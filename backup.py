@@ -1,8 +1,8 @@
 import confluent_kafka
 from datetime import datetime
 import tarfile
-import os
 import hashlib
+from os import mkdir
 
 class KBackup:
     def __init__(self):
@@ -12,7 +12,8 @@ class KBackup:
             'group.id': "Kafka-BackUp-Consumer-Group",
             'auto.offset.reset': 'earliest'
         }
-        self.BACKUP_DIR = "/tmp"
+        self.TOPIC_NAME_LIST = ["davinder.test"]
+        self.BACKUP_DIR = "/tmp/" + self.TOPIC_NAME_LIST[0]
         self.BACKUP_TMP_FILE = self.BACKUP_DIR + "/kafka-backup.bin"
 
     def __calculateSha256(self, file):
@@ -35,9 +36,17 @@ class KBackup:
         _t.close()
         self.__createSha256OfBackupFile(file)
 
+    def __createBackupTopicDir(self):
+        try:
+            mkdir(self.BACKUP_DIR)
+        except FileExistsError:
+            pass
+
     def readFromTopic(self):
         _rt = confluent_kafka.Consumer(self.CONSUMERCONFIG)
-        _rt.subscribe(["davinder.test"])
+        _rt.subscribe(self.TOPIC_NAME_LIST)
+
+        self.__createBackupTopicDir()
 
         count = 0
         while True:
