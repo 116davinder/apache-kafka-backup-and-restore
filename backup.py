@@ -14,7 +14,7 @@ class KBackup:
         }
         self.TOPIC_NAME_LIST = ["davinder.test"]
         self.BACKUP_DIR = "/tmp/" + self.TOPIC_NAME_LIST[0]
-        self.BACKUP_TMP_FILE = self.BACKUP_DIR + "/kafka-backup.bin"
+        self.BACKUP_TMP_FILE = self.BACKUP_DIR + "/current.bin"
 
     def __calculateSha256(self, file):
         with open(file,"rb") as f:
