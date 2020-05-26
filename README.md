@@ -7,7 +7,17 @@ It will take backup of given topic and store that into either local filesystem o
 * confluent-kafka
 
 # How to Run it
-python3 backup.py
+python3 backup.py config.json
+
+Example Run Output
+```
+$ python3 backup.py config.json
+Created Successful Backupfile: /tmp/davinder.test/20204226-104202.tar.gz
+Created Successful Backup sha256 file: /tmp/davinder.test/20204226-104202.tar.gz.sha256
+Created Successful Backupfile: /tmp/davinder.test/20204226-104203.tar.gz
+Created Successful Backup sha256 file: /tmp/davinder.test/20204226-104203.tar.gz.sha256
+....
+```
 
 # Backup Directory Structure
 ```
