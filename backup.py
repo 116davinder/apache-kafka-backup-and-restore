@@ -24,14 +24,6 @@ class KBackup:
                 'auto.offset.reset': 'earliest'
             }
 
-    def __writeDataToKafkaBinFile(self,msg,mode):
-        try:
-            with open(self.BACKUP_TMP_FILE, mode) as f:
-                f.write(msg.value().decode('utf-8'))
-                f.write("\n")
-        except:
-            print(f"unable to write to {self.BACKUP_TMP_FILE} or decode msg to utf-8")
-
     def readFromTopic(self):
         _rt = confluent_kafka.Consumer(self.CONSUMERCONFIG)
         _rt.subscribe(self.TOPIC_NAME_LIST)
