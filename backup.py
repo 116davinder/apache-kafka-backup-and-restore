@@ -18,7 +18,7 @@ class KBackup:
         self.GROUP_ID = _config['GROUP_ID']
         self.TOPIC_NAME_LIST = _config['TOPIC_NAMES']
         self.BACKUP_DIR = _config['FILESYSTEM_BACKUP_DIR'] + self.TOPIC_NAME_LIST[0]
-        self.BACKUP_TMP_FILE = self.BACKUP_DIR + "current.bin"
+        self.BACKUP_TMP_FILE = self.BACKUP_DIR + "/current.bin"
         self.FILESYSTEM_TYPE = _config['FILESYSTEM_TYPE']
         try:
             self.NUMBER_OF_MESSAGE_PER_BACKUP_FILE = int(_config['NUMBER_OF_MESSAGE_PER_BACKUP_FILE'])
@@ -65,15 +65,23 @@ class KBackup:
         except FileExistsError:
             pass
 
+    def __currentMessageCountInBinFile(self):
+        try:
+            with open(self.BACKUP_TMP_FILE) as f:
+                return sum(1 for _ in f)
+        except:
+            return 0
+
     def readFromTopic(self):
         _rt = confluent_kafka.Consumer(self.CONSUMERCONFIG)
         _rt.subscribe(self.TOPIC_NAME_LIST)
 
         self.__createBackupTopicDir()
 
-        count = 0
+        count = self.__currentMessageCountInBinFile()
+
         while True:
-            msg = _rt.poll(timeout=5.0)
+            msg = _rt.poll(timeout=1.0)
             if msg is None:
                 continue
             if msg.error():
