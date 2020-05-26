@@ -1,6 +1,8 @@
 # apache-kafka-backup-and-restore
 It will take backup of given topic and store that into either local filesystem or S3.
 
+It will auto resume from same point from where it died for some reason given consumer group name is same before and after crash.
+
 **[In Development]**
 
 ## Requirements
