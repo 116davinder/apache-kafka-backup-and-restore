@@ -1,84 +1,44 @@
 import confluent_kafka
-from datetime import datetime
-import tarfile
-import hashlib
-from os import mkdir,sys
-import json
+from os import sys
+from common import Common
 
 class KBackup:
     def __init__(self,configFilePath):
-        try:
-            with open(configFilePath) as cf:
-                _config = json.load(cf)
-        except:
-            print("unable to load config.json")
-            exit(1)
 
-        self.BOOTSTRAP_SERVERS = _config['BOOTSTRAP_SERVERS']
-        self.GROUP_ID = _config['GROUP_ID']
-        self.TOPIC_NAME_LIST = _config['TOPIC_NAMES']
-        self.BACKUP_DIR = _config['FILESYSTEM_BACKUP_DIR'] + self.TOPIC_NAME_LIST[0]
-        self.BACKUP_TMP_FILE = self.BACKUP_DIR + "/current.bin"
-        self.FILESYSTEM_TYPE = _config['FILESYSTEM_TYPE']
-        try:
-            self.NUMBER_OF_MESSAGE_PER_BACKUP_FILE = int(_config['NUMBER_OF_MESSAGE_PER_BACKUP_FILE'])
-        except:
-            print(f"NUMBER_OF_MESSAGE_PER_BACKUP_FILE: {self.NUMBER_OF_MESSAGE_PER_BACKUP_FILE}\
-                is not integer value")
-        self.CONSUMERCONFIG = {
-            'bootstrap.servers': self.BOOTSTRAP_SERVERS,
-            'group.id': self.GROUP_ID,
-            'auto.offset.reset': 'earliest'
-        }
-
-    def __calculateSha256(self, file):
-        with open(file,"rb") as f:
-            return hashlib.sha256(f.read()).hexdigest();
-
-    def __createSha256OfBackupFile(self, file):
-        with open(file + ".sha256", "w") as f:
-            f.write(self.__calculateSha256(file))
+        _config = Common.readJsonConfig(configFilePath)
+        if _config is not None:
+            self.BOOTSTRAP_SERVERS = _config['BOOTSTRAP_SERVERS']
+            self.GROUP_ID = _config['GROUP_ID']
+            self.TOPIC_NAME_LIST = _config['TOPIC_NAMES']
+            self.BACKUP_DIR = _config['FILESYSTEM_BACKUP_DIR'] + self.TOPIC_NAME_LIST[0]
+            self.BACKUP_TMP_FILE = self.BACKUP_DIR + "/current.bin"
+            self.FILESYSTEM_TYPE = _config['FILESYSTEM_TYPE']
+            try:
+                self.NUMBER_OF_MESSAGE_PER_BACKUP_FILE = int(_config['NUMBER_OF_MESSAGE_PER_BACKUP_FILE'])
+            except:
+                print(f"NUMBER_OF_MESSAGE_PER_BACKUP_FILE: {self.NUMBER_OF_MESSAGE_PER_BACKUP_FILE}\
+                    is not integer value")
+            self.CONSUMERCONFIG = {
+                'bootstrap.servers': self.BOOTSTRAP_SERVERS,
+                'group.id': self.GROUP_ID,
+                'auto.offset.reset': 'earliest'
+            }
 
     def __writeDataToKafkaBinFile(self,msg,mode):
-        with open(self.BACKUP_TMP_FILE, mode) as f:
-            try:
+        try:
+            with open(self.BACKUP_TMP_FILE, mode) as f:
                 f.write(msg.value().decode('utf-8'))
                 f.write("\n")
-            except:
-                if mode != "w":
-                    print("unable to write to new file")
-                else:
-                    print("unable to append to current.bin file")
-
-    def __createTarGz(self):
-        file = self.BACKUP_DIR + "/" + datetime.now().strftime("%Y%M%d-%H%M%S") + ".tar.gz"
-        _t = tarfile.open(file, "w:gz")
-        _t.add(self.BACKUP_TMP_FILE)
-        _t.close()
-        print(f"Created Successful Backupfile: {file}")
-        self.__createSha256OfBackupFile(file)
-        print(f"Created Successful Backup sha256 file: {file}.sha256")
-
-    def __createBackupTopicDir(self):
-        try:
-            mkdir(self.BACKUP_DIR)
-        except FileExistsError:
-            pass
-
-    def __currentMessageCountInBinFile(self):
-        try:
-            with open(self.BACKUP_TMP_FILE) as f:
-                return sum(1 for _ in f)
         except:
-            return 0
+            print(f"unable to write to {self.BACKUP_TMP_FILE} or decode msg to utf-8")
 
     def readFromTopic(self):
         _rt = confluent_kafka.Consumer(self.CONSUMERCONFIG)
         _rt.subscribe(self.TOPIC_NAME_LIST)
 
-        self.__createBackupTopicDir()
+        Common.createBackupTopicDir(self.BACKUP_DIR)
 
-        count = self.__currentMessageCountInBinFile()
+        count = Common.currentMessageCountInBinFile(self.BACKUP_TMP_FILE)
 
         while True:
             msg = _rt.poll(timeout=1.0)
@@ -88,15 +48,19 @@ class KBackup:
                 print(f"Consumer Error: {msg.error()}")
                 continue
 
-            if count == 0:
-                self.__writeDataToKafkaBinFile(msg, "a+")
-            if count > 0:
-                if count % self.NUMBER_OF_MESSAGE_PER_BACKUP_FILE == 0:
-                    self.__createTarGz()
-                    self.__writeDataToKafkaBinFile(msg, "w")
-                else:
-                    self.__writeDataToKafkaBinFile(msg, "a+")
+            _msg = Common.decodeMsgToUtf8(msg)
+
+            if _msg is not None:
+                if count == 0:
+                    Common.writeDataToKafkaBinFile(self.BACKUP_TMP_FILE, _msg, "a+")
+                if count > 0:
+                    if count % self.NUMBER_OF_MESSAGE_PER_BACKUP_FILE == 0:
+                        Common.createTarGz(self.BACKUP_DIR, self.BACKUP_TMP_FILE)
+                        Common.writeDataToKafkaBinFile(self.BACKUP_TMP_FILE, _msg, "w")
+                    else:
+                        Common.writeDataToKafkaBinFile(self.BACKUP_TMP_FILE, _msg, "a+")
             count += 1
+            _rt.commit(asynchronous=False)
 
         _rt.close()
 
