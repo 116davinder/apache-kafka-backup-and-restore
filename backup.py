@@ -20,7 +20,11 @@ class KBackup:
         self.BACKUP_DIR = _config['FILESYSTEM_BACKUP_DIR'] + self.TOPIC_NAME_LIST[0]
         self.BACKUP_TMP_FILE = self.BACKUP_DIR + "current.bin"
         self.FILESYSTEM_TYPE = _config['FILESYSTEM_TYPE']
-
+        try:
+            self.NUMBER_OF_MESSAGE_PER_BACKUP_FILE = int(_config['NUMBER_OF_MESSAGE_PER_BACKUP_FILE'])
+        except:
+            print(f"NUMBER_OF_MESSAGE_PER_BACKUP_FILE: {self.NUMBER_OF_MESSAGE_PER_BACKUP_FILE}\
+                is not integer value")
         self.CONSUMERCONFIG = {
             'bootstrap.servers': self.BOOTSTRAP_SERVERS,
             'group.id': self.GROUP_ID,
@@ -79,7 +83,7 @@ class KBackup:
             if count == 0:
                 self.__writeDataToKafkaBinFile(msg, "a+")
             if count > 0:
-                if count % 50 == 0:
+                if count % self.NUMBER_OF_MESSAGE_PER_BACKUP_FILE == 0:
                     self.__createTarGz()
                     self.__writeDataToKafkaBinFile(msg, "w")
                 else:
