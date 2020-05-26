@@ -11,7 +11,19 @@ It will auto resume from same point from where it died for some reason given con
 # How to Run it
 python3 backup.py config.json
 
-Example Run Output
+Sample Config.json
+```
+{
+  "BOOTSTRAP_SERVERS": "localhost:9092",
+  "TOPIC_NAMES": ["davinder.test"],
+  "GROUP_ID": "Kafka-BackUp-Consumer-Group",
+  "POLL_TIME": 5.0,
+  "FILESYSTEM_TYPE": "LINUX",
+  "FILESYSTEM_BACKUP_DIR": "/tmp/",
+  "NUMBER_OF_MESSAGE_PER_BACKUP_FILE": 50
+}
+```
+Run Output
 ```
 $ python3 backup.py config.json
 Created Successful Backupfile: /tmp/davinder.test/20204226-104202.tar.gz
