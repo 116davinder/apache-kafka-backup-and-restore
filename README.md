@@ -17,7 +17,6 @@ Sample Config.json
   "BOOTSTRAP_SERVERS": "localhost:9092",
   "TOPIC_NAMES": ["davinder.test"],
   "GROUP_ID": "Kafka-BackUp-Consumer-Group",
-  "POLL_TIME": 5.0,
   "FILESYSTEM_TYPE": "LINUX",
   "FILESYSTEM_BACKUP_DIR": "/tmp/",
   "NUMBER_OF_MESSAGE_PER_BACKUP_FILE": 50
