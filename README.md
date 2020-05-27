@@ -25,10 +25,13 @@ Sample Config.json
 Run Output
 ```
 $ python3 backup.py config.json
-Created Successful Backupfile: /tmp/davinder.test/20204226-104202.tar.gz
-Created Successful Backup sha256 file: /tmp/davinder.test/20204226-104202.tar.gz.sha256
-Created Successful Backupfile: /tmp/davinder.test/20204226-104203.tar.gz
-Created Successful Backup sha256 file: /tmp/davinder.test/20204226-104203.tar.gz.sha256
+{ "@timestamp": "2020-05-27 11:52:06,728","level": "INFO","name": "root","message": "Successful loading of config.json file" }
+{ "@timestamp": "2020-05-27 11:52:06,729","level": "INFO","name": "root","message": "all required variables are sucessfully set from config.json" }
+{ "@timestamp": "2020-05-27 11:52:06,733","level": "INFO","name": "root","message": "folder already exists /tmp/davinder.test" }
+{ "@timestamp": "2020-05-27 11:52:14,304","level": "INFO","name": "root","message": "Created Successful Backupfile /tmp/davinder.test/20200527-115214.tar.gz" }
+{ "@timestamp": "2020-05-27 11:52:14,306","level": "INFO","name": "root","message": "Created Successful Backup sha256 file of /tmp/davinder.test/20200527-115214.tar.gz.sha256" }
+{ "@timestamp": "2020-05-27 11:52:15,308","level": "INFO","name": "root","message": "Created Successful Backupfile /tmp/davinder.test/20200527-115215.tar.gz" }
+{ "@timestamp": "2020-05-27 11:52:15,312","level": "INFO","name": "root","message": "Created Successful Backup sha256 file of /tmp/davinder.test/20200527-115215.tar.gz.sha256" }
 ....
 ```
 
