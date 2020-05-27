@@ -1,6 +1,7 @@
 import confluent_kafka
 from os import sys
 from common import Common
+import logging
 
 class KBackup:
     def __init__(self,configFilePath):
@@ -16,13 +17,18 @@ class KBackup:
             try:
                 self.NUMBER_OF_MESSAGE_PER_BACKUP_FILE = int(_config['NUMBER_OF_MESSAGE_PER_BACKUP_FILE'])
             except:
-                print(f"NUMBER_OF_MESSAGE_PER_BACKUP_FILE: {self.NUMBER_OF_MESSAGE_PER_BACKUP_FILE}\
-                    is not integer value")
+                logging.info(f"NUMBER_OF_MESSAGE_PER_BACKUP_FILE {str(_config['NUMBER_OF_MESSAGE_PER_BACKUP_FILE'])} is not integer value")
+                self.NUMBER_OF_MESSAGE_PER_BACKUP_FILE = 50
+                logging.info(f"NUMBER_OF_MESSAGE_PER_BACKUP_FILE is set to default value 50")
+
             self.CONSUMERCONFIG = {
                 'bootstrap.servers': self.BOOTSTRAP_SERVERS,
                 'group.id': self.GROUP_ID,
                 'auto.offset.reset': 'earliest'
             }
+            logging.info(f"all required variables are sucessfully set from {configFilePath}")
+        else:
+            logging.error(f"all required variables are not sucessfully set from {configFilePath}")
 
     def readFromTopic(self):
         _rt = confluent_kafka.Consumer(self.CONSUMERCONFIG)
@@ -37,7 +43,7 @@ class KBackup:
             if msg is None:
                 continue
             if msg.error():
-                print(f"Consumer Error: {msg.error()}")
+                logging.error(f"{msg.error()}")
                 continue
 
             _msg = Common.decodeMsgToUtf8(msg)
@@ -57,6 +63,11 @@ class KBackup:
         _rt.close()
 
 def main():
+    logging.basicConfig(
+        format='{ "@timestamp": "%(asctime)s","level": "%(levelname)s","name": "%(name)s","message": "%(message)s" }'
+    )
+    logging.getLogger().setLevel(logging.INFO)
+
     configFilePath = sys.argv[1]
     b = KBackup(configFilePath)
     b.readFromTopic()

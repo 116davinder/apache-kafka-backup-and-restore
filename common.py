@@ -3,15 +3,17 @@ from datetime import datetime
 from os import mkdir
 import tarfile
 import json
+import logging
 
 class Common:
 
     def readJsonConfig(file):
         try:
             with open(file) as cf:
+                logging.info(f'Successful loading of {file} file')
                 return json.load(cf)
         except:
-            print("unable to load config.json")
+            logging.error(f'unable to load {file}')
             exit(1)
 
     def calculateSha256(file):
@@ -19,14 +21,19 @@ class Common:
             return sha256(f.read()).hexdigest();
 
     def createSha256OfBackupFile(file,hash):
-        with open(file + ".sha256", "w") as f:
-            f.write(hash)
+        try:
+            with open(file + ".sha256", "w") as f:
+                f.write(hash)
+        except:
+            logging.error(f'unable to write to {file}.sha256')
 
     def createBackupTopicDir(dir):
         try:
             mkdir(dir)
         except FileExistsError:
-            pass
+            logging.info(f'folder already exists {dir}')
+        except:
+            logging.error(f'unable to create folder {dir}')
 
     def currentMessageCountInBinFile(file):
         try:
@@ -39,7 +46,7 @@ class Common:
         try:
             return msg.value().decode('utf-8')
         except:
-            print("decoding msg to utf-8 failed")
+            logging.error(f'decoding msg to utf-8 failed')
             return None
 
     def writeDataToKafkaBinFile(file,msg,mode):
@@ -48,7 +55,7 @@ class Common:
                 f.write(msg)
                 f.write("\n")
         except:
-            print(f"unable to write to {file}")
+            logging.error(f'unable to write to {file}')
 
     def createTarGz(dir,file):
         _file_tar_gz = dir + "/" + datetime.now().strftime("%Y%m%d-%H%M%S") + ".tar.gz"
@@ -57,8 +64,8 @@ class Common:
             _t.add(file)
             _t.close()
         except:
-            print(f"unable to create tar.gz file of {file}")
+            logging.error(f'unable to create/write to {_file_tar_gz}')
 
-        print(f"Created Successful Backupfile: {_file_tar_gz}")
+        logging.info(f"Created Successful Backupfile {_file_tar_gz}")
         Common.createSha256OfBackupFile(_file_tar_gz,Common.calculateSha256(_file_tar_gz))
-        print(f"Created Successful Backup sha256 file: {_file_tar_gz}.sha256")
+        logging.info(f"Created Successful Backup sha256 file of {_file_tar_gz}.sha256")
