@@ -6,20 +6,18 @@ import threading
 from upload import Upload
 
 class KBackup:
-    def __init__(self,configFilePath):
+    def __init__(self,config):
 
-        _config = Common.readJsonConfig(configFilePath)
-        if _config is not None:
-            self.BOOTSTRAP_SERVERS = _config['BOOTSTRAP_SERVERS']
-            self.GROUP_ID = _config['GROUP_ID']
-            self.TOPIC_NAME_LIST = _config['TOPIC_NAMES']
-            self.BACKUP_DIR = _config['FILESYSTEM_BACKUP_DIR'] + self.TOPIC_NAME_LIST[0]
+        if config is not None:
+            self.BOOTSTRAP_SERVERS = config['BOOTSTRAP_SERVERS']
+            self.GROUP_ID = config['GROUP_ID']
+            self.TOPIC_NAME_LIST = config['TOPIC_NAMES']
+            self.BACKUP_DIR = config['FILESYSTEM_BACKUP_DIR'] + self.TOPIC_NAME_LIST[0]
             self.BACKUP_TMP_FILE = self.BACKUP_DIR + "/current.bin"
-            self.FILESYSTEM_TYPE = _config['FILESYSTEM_TYPE']
             try:
-                self.NUMBER_OF_MESSAGE_PER_BACKUP_FILE = int(_config['NUMBER_OF_MESSAGE_PER_BACKUP_FILE'])
+                self.NUMBER_OF_MESSAGE_PER_BACKUP_FILE = int(config['NUMBER_OF_MESSAGE_PER_BACKUP_FILE'])
             except:
-                logging.info(f"NUMBER_OF_MESSAGE_PER_BACKUP_FILE {str(_config['NUMBER_OF_MESSAGE_PER_BACKUP_FILE'])} is not integer value")
+                logging.info(f"NUMBER_OF_MESSAGE_PER_BACKUP_FILE {str(config['NUMBER_OF_MESSAGE_PER_BACKUP_FILE'])} is not integer value")
                 self.NUMBER_OF_MESSAGE_PER_BACKUP_FILE = 50
                 logging.info(f"NUMBER_OF_MESSAGE_PER_BACKUP_FILE is set to default value 50")
 
@@ -28,9 +26,9 @@ class KBackup:
                 'group.id': self.GROUP_ID,
                 'auto.offset.reset': 'earliest'
             }
-            logging.info(f"all required variables are successfully set from {configFilePath}")
+            logging.info(f"all required variables are successfully")
         else:
-            logging.error(f"all required variables are not successfully set from {configFilePath}")
+            logging.error(f"all required variables are not successfully")
 
     def readFromTopic(self):
         _rt = confluent_kafka.Consumer(self.CONSUMERCONFIG)
@@ -39,10 +37,11 @@ class KBackup:
         Common.createBackupTopicDir(self.BACKUP_DIR)
 
         count = Common.currentMessageCountInBinFile(self.BACKUP_TMP_FILE)
-        logging.info(f"starting polling on {self.TOPIC_NAME_LIST}")
+        logging.info(f"starting polling on {self.TOPIC_NAME_LIST[0]}")
         while True:
             msg = _rt.poll(timeout=1.0)
             if msg is None:
+                # logging.info(f"waiting for new messages")
                 continue
             if msg.error():
                 logging.error(f"{msg.error()}")
@@ -71,13 +70,21 @@ def main():
     )
     logging.getLogger().setLevel(logging.INFO)
 
-    configFilePath = sys.argv[1]
-    b = KBackup(configFilePath)
+    config = Common.readJsonConfig(sys.argv[1])
+
+    b = KBackup(config)
     _r_thread = threading.Thread(target=b.readFromTopic,name="Kafka Consumer")
     _r_thread.start()
 
-    _upload_thread = threading.Thread(target=Upload.s3_upload_files,args=["davinder-test-kafka-backup", "/tmp/", "davinder.test"], name="S3-Upload")
-    _upload_thread.start()
+    if config['FILESYSTEM_TYPE'] == "S3":
+        try:
+            bucket = config['BUCKET_NAME']
+            tmp_dir = config['FILESYSTEM_BACKUP_DIR']
+            topic_name = config['TOPIC_NAMES'][0]
+            _upload_thread = threading.Thread(target=Upload.s3_upload_files,args=[bucket, tmp_dir, topic_name], name="S3-Upload")
+            _upload_thread.start()
+        except KeyError as e:
+            logging.error(f"unable to set s3 required variables {e}")
 
 if __name__ == "__main__":
     main()

@@ -26,10 +26,10 @@ class Upload:
                         file_path = dir + topic_name + "/" + f
                         object_name = topic_name + "/" + f
                         response = s3_client.upload_file(file_path,bucket,object_name)
-                        logging.info(f"upload done for {file_path} at destination path {object_name}")
+                        logging.info(f"upload successful at s3://{bucket}/{object_name}")
                         os.remove(file_path)
                     except ClientError as e:
-                        logging.error(f"file upload failed error {e}")
+                        logging.error(f"{file_path} upload failed error {e}")
             else:
                 logging.info("waiting for new files to be generated")
                 time.sleep(10)

@@ -1,17 +1,25 @@
 # apache-kafka-backup-and-restore
 It will take backup of given topic and store that into either local filesystem or S3.
 
-It will auto resume from same point from where it died for some reason given consumer group name is same before and after crash.
+It will auto resume from same point from where it died if given consumer group name is same before and after crash.
 
-**[In Development]**
+**Note**
+* it won't upload `current.bin` file to s3 which contains messages upto `NUMBER_OF_MESSAGE_PER_BACKUP_FILE - 1`.
+* upload to s3 is async method.
 
 ## Requirements
 * confluent-kafka
+* boto3
 
 # How to Run it
-python3 backup.py config.json
+```
+export AWS_SECRET_ACCESS_KEY=XXXXXXXXXXXXXXX
+export AWS_ACCESS_KEY_ID=XXXXXXXXXXXXX
 
-Sample Config.json
+python3 backup.py config.json
+```
+
+**Local Filesytem Backup config.json**
 ```
 {
   "BOOTSTRAP_SERVERS": "localhost:9092",
@@ -22,7 +30,20 @@ Sample Config.json
   "NUMBER_OF_MESSAGE_PER_BACKUP_FILE": 50
 }
 ```
-Run Output
+
+**S3 Backup config.json**
+```
+{
+  "BOOTSTRAP_SERVERS": "localhost:9092",
+  "TOPIC_NAMES": ["davinder.test"],
+  "GROUP_ID": "Kafka-BackUp-Consumer-Group",
+  "FILESYSTEM_TYPE": "S3",
+  "FILESYSTEM_BACKUP_DIR": "/tmp/",
+  "NUMBER_OF_MESSAGE_PER_BACKUP_FILE": 50
+}
+```
+
+**Example Run Output**
 ```
 $ python3 backup.py config.json
 { "@timestamp": "2020-05-31 18:54:18,765","level": "INFO","thread": "MainThread","name": "root","message": "Successful loading of config.json file" }
