@@ -31,7 +31,7 @@ class Common:
         try:
             mkdir(dir)
         except FileExistsError:
-            logging.info(f'folder already exists {dir}')
+            logging.info(f'topic folder already exists {dir}')
         except:
             logging.error(f'unable to create folder {dir}')
 
@@ -58,10 +58,11 @@ class Common:
             logging.error(f'unable to write to {file}')
 
     def createTarGz(dir,file):
-        _file_tar_gz = dir + "/" + datetime.now().strftime("%Y%m%d-%H%M%S") + ".tar.gz"
+        _date = datetime.now().strftime("%Y%m%d-%H%M%S")
+        _file_tar_gz = dir + "/" + _date + ".tar.gz"
         try:
             _t = tarfile.open(_file_tar_gz, "w:gz")
-            _t.add(file)
+            _t.add(file,arcname=_date + ".bin")
             _t.close()
         except:
             logging.error(f'unable to create/write to {_file_tar_gz}')
