@@ -46,26 +46,33 @@ python3 backup.py backup.json
 
 **Example Run Output**
 ```
-$ python3 backup.py config.json
-{ "@timestamp": "2020-05-31 18:54:18,765","level": "INFO","thread": "MainThread","name": "root","message": "Successful loading of config.json file" }
-{ "@timestamp": "2020-05-31 18:54:18,766","level": "INFO","thread": "MainThread","name": "root","message": "all required variables are successfully set from config.json" }
-{ "@timestamp": "2020-05-31 18:54:18,770","level": "INFO","thread": "Kafka Consumer","name": "root","message": "topic folder already exists /tmp/davinder.test" }
-{ "@timestamp": "2020-05-31 18:54:18,785","level": "INFO","thread": "Kafka Consumer","name": "root","message": "starting polling on ['davinder.test']" }
-{ "@timestamp": "2020-05-31 18:54:18,798","level": "INFO","thread": "S3-Upload","name": "botocore.credentials","message": "Found credentials in environment variables." }
-{ "@timestamp": "2020-05-31 18:54:18,922","level": "INFO","thread": "S3-Upload","name": "root","message": "waiting for new files to be generated" }
-{ "@timestamp": "2020-05-31 18:54:46,433","level": "INFO","thread": "Kafka Consumer","name": "root","message": "Created Successful Backupfile /tmp/davinder.test/20200531-185446.tar.gz" }
-{ "@timestamp": "2020-05-31 18:54:46,435","level": "INFO","thread": "Kafka Consumer","name": "root","message": "Created Successful Backup sha256 file of /tmp/davinder.test/20200531-185446.tar.gz.sha256" }
-{ "@timestamp": "2020-05-31 18:54:47,260","level": "INFO","thread": "Kafka Consumer","name": "root","message": "Created Successful Backupfile /tmp/davinder.test/20200531-185447.tar.gz" }
-{ "@timestamp": "2020-05-31 18:54:47,262","level": "INFO","thread": "Kafka Consumer","name": "root","message": "Created Successful Backup sha256 file of /tmp/davinder.test/20200531-185447.tar.gz.sha256" }
-{ "@timestamp": "2020-05-31 18:54:48,265","level": "INFO","thread": "Kafka Consumer","name": "root","message": "Created Successful Backupfile /tmp/davinder.test/20200531-185448.tar.gz" }
-{ "@timestamp": "2020-05-31 18:54:48,266","level": "INFO","thread": "Kafka Consumer","name": "root","message": "Created Successful Backup sha256 file of /tmp/davinder.test/20200531-185448.tar.gz.sha256" }
-{ "@timestamp": "2020-05-31 18:54:49,235","level": "INFO","thread": "S3-Upload","name": "root","message": "upload done for /tmp/davinder.test/20200531-185446.tar.gz at destination path davinder.test/20200531-185446.tar.gz" }
-{ "@timestamp": "2020-05-31 18:54:49,330","level": "INFO","thread": "S3-Upload","name": "root","message": "upload done for /tmp/davinder.test/20200531-185446.tar.gz.sha256 at destination path davinder.test/20200531-185446.tar.gz.sha256" }
-{ "@timestamp": "2020-05-31 18:54:49,419","level": "INFO","thread": "S3-Upload","name": "root","message": "upload done for /tmp/davinder.test/20200531-185447.tar.gz at destination path davinder.test/20200531-185447.tar.gz" }
-{ "@timestamp": "2020-05-31 18:54:49,510","level": "INFO","thread": "S3-Upload","name": "root","message": "upload done for /tmp/davinder.test/20200531-185447.tar.gz.sha256 at destination path davinder.test/20200531-185447.tar.gz.sha256" }
-{ "@timestamp": "2020-05-31 18:54:49,601","level": "INFO","thread": "S3-Upload","name": "root","message": "upload done for /tmp/davinder.test/20200531-185448.tar.gz at destination path davinder.test/20200531-185448.tar.gz" }
-{ "@timestamp": "2020-05-31 18:54:49,695","level": "INFO","thread": "S3-Upload","name": "root","message": "upload done for /tmp/davinder.test/20200531-185448.tar.gz.sha256 at destination path davinder.test/20200531-185448.tar.gz.sha256" }
-{ "@timestamp": "2020-05-31 18:54:49,697","level": "INFO","thread": "S3-Upload","name": "root","message": "waiting for new files to be generated" }
+$ python3 backup.py backup.json
+{ "@timestamp": "2020-06-01 10:37:00,168","level": "INFO","thread": "MainThread","name": "root","message": "Successful loading of config.json file" }
+{ "@timestamp": "2020-06-01 10:37:00,169","level": "INFO","thread": "MainThread","name": "root","message": "all required variables are successfully" }
+{ "@timestamp": "2020-06-01 10:37:00,174","level": "INFO","thread": "Kafka Consumer","name": "root","message": "topic folder already exists /tmp/davinder.test" }
+{ "@timestamp": "2020-06-01 10:37:00,187","level": "INFO","thread": "Kafka Consumer","name": "root","message": "starting polling on davinder.test" }
+{ "@timestamp": "2020-06-01 10:37:00,217","level": "INFO","thread": "S3-Upload","name": "botocore.credentials","message": "Found credentials in environment variables." }
+{ "@timestamp": "2020-06-01 10:37:00,324","level": "INFO","thread": "S3-Upload","name": "root","message": "waiting for new files to be generated" }
+{ "@timestamp": "2020-06-01 10:38:00,325","level": "INFO","thread": "S3-Upload","name": "root","message": "waiting for new files to be generated" }
+{ "@timestamp": "2020-06-01 10:38:17,291","level": "INFO","thread": "Kafka Consumer","name": "root","message": "Created Successful Backupfile /tmp/davinder.test/20200601-103817.tar.gz" }
+{ "@timestamp": "2020-06-01 10:38:17,294","level": "INFO","thread": "Kafka Consumer","name": "root","message": "Created Successful Backup sha256 file of /tmp/davinder.test/20200601-103817.tar.gz.sha256" }
+{ "@timestamp": "2020-06-01 10:38:18,223","level": "INFO","thread": "Kafka Consumer","name": "root","message": "Created Successful Backupfile /tmp/davinder.test/20200601-103818.tar.gz" }
+{ "@timestamp": "2020-06-01 10:38:18,226","level": "INFO","thread": "Kafka Consumer","name": "root","message": "Created Successful Backup sha256 file of /tmp/davinder.test/20200601-103818.tar.gz.sha256" }
+{ "@timestamp": "2020-06-01 10:38:19,044","level": "INFO","thread": "Kafka Consumer","name": "root","message": "Created Successful Backupfile /tmp/davinder.test/20200601-103819.tar.gz" }
+{ "@timestamp": "2020-06-01 10:38:19,048","level": "INFO","thread": "Kafka Consumer","name": "root","message": "Created Successful Backup sha256 file of /tmp/davinder.test/20200601-103819.tar.gz.sha256" }
+{ "@timestamp": "2020-06-01 10:38:19,974","level": "INFO","thread": "Kafka Consumer","name": "root","message": "Created Successful Backupfile /tmp/davinder.test/20200601-103819.tar.gz" }
+{ "@timestamp": "2020-06-01 10:38:19,977","level": "INFO","thread": "Kafka Consumer","name": "root","message": "Created Successful Backup sha256 file of /tmp/davinder.test/20200601-103819.tar.gz.sha256" }
+{ "@timestamp": "2020-06-01 10:38:20,961","level": "INFO","thread": "Kafka Consumer","name": "root","message": "Created Successful Backupfile /tmp/davinder.test/20200601-103820.tar.gz" }
+{ "@timestamp": "2020-06-01 10:38:20,963","level": "INFO","thread": "Kafka Consumer","name": "root","message": "Created Successful Backup sha256 file of /tmp/davinder.test/20200601-103820.tar.gz.sha256" }
+{ "@timestamp": "2020-06-01 10:39:00,631","level": "INFO","thread": "S3-Upload","name": "root","message": "upload successful at s3://davinder-test-kafka-backup/davinder.test/20200601-103817.tar.gz" }
+{ "@timestamp": "2020-06-01 10:39:00,747","level": "INFO","thread": "S3-Upload","name": "root","message": "upload successful at s3://davinder-test-kafka-backup/davinder.test/20200601-103817.tar.gz.sha256" }
+{ "@timestamp": "2020-06-01 10:39:01,084","level": "INFO","thread": "S3-Upload","name": "root","message": "upload successful at s3://davinder-test-kafka-backup/davinder.test/20200601-103818.tar.gz" }
+{ "@timestamp": "2020-06-01 10:39:01,182","level": "INFO","thread": "S3-Upload","name": "root","message": "upload successful at s3://davinder-test-kafka-backup/davinder.test/20200601-103818.tar.gz.sha256" }
+{ "@timestamp": "2020-06-01 10:39:01,301","level": "INFO","thread": "S3-Upload","name": "root","message": "upload successful at s3://davinder-test-kafka-backup/davinder.test/20200601-103819.tar.gz" }
+{ "@timestamp": "2020-06-01 10:39:01,427","level": "INFO","thread": "S3-Upload","name": "root","message": "upload successful at s3://davinder-test-kafka-backup/davinder.test/20200601-103819.tar.gz.sha256" }
+{ "@timestamp": "2020-06-01 10:39:01,520","level": "INFO","thread": "S3-Upload","name": "root","message": "upload successful at s3://davinder-test-kafka-backup/davinder.test/20200601-103820.tar.gz" }
+{ "@timestamp": "2020-06-01 10:39:01,617","level": "INFO","thread": "S3-Upload","name": "root","message": "upload successful at s3://davinder-test-kafka-backup/davinder.test/20200601-103820.tar.gz.sha256" }
+{ "@timestamp": "2020-06-01 10:39:01,620","level": "INFO","thread": "S3-Upload","name": "root","message": "waiting for new files to be generated" }
 ....
 ```
 
