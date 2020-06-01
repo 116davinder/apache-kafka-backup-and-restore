@@ -1,6 +1,6 @@
 from hashlib import sha256
 from datetime import datetime
-from os import mkdir
+import os
 import tarfile
 import json
 import logging
@@ -29,7 +29,7 @@ class Common:
 
     def createBackupTopicDir(dir):
         try:
-            mkdir(dir)
+            os.mkdir(dir)
         except FileExistsError:
             logging.info(f'topic folder already exists {dir}')
         except:
@@ -59,7 +59,7 @@ class Common:
 
     def createTarGz(dir,file):
         _date = datetime.now().strftime("%Y%m%d-%H%M%S")
-        _file_tar_gz = dir + "/" + _date + ".tar.gz"
+        _file_tar_gz = os.path.join(dir, _date ) + ".tar.gz"
         try:
             _t = tarfile.open(_file_tar_gz, "w:gz")
             _t.add(file,arcname=_date + ".bin")

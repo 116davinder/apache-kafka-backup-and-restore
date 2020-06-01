@@ -16,10 +16,10 @@ It will auto resume from same point from where it died if given consumer group n
 export AWS_SECRET_ACCESS_KEY=XXXXXXXXXXXXXXX
 export AWS_ACCESS_KEY_ID=XXXXXXXXXXXXX
 
-python3 backup.py config.json
+python3 backup.py backup.json
 ```
 
-**Local Filesytem Backup config.json**
+**Local Filesytem Backup backup.json**
 ```
 {
   "BOOTSTRAP_SERVERS": "localhost:9092",
@@ -31,7 +31,7 @@ python3 backup.py config.json
 }
 ```
 
-**S3 Backup config.json**
+**S3 Backup backup.json**
 ```
 {
   "BOOTSTRAP_SERVERS": "localhost:9092",
@@ -39,7 +39,8 @@ python3 backup.py config.json
   "GROUP_ID": "Kafka-BackUp-Consumer-Group",
   "FILESYSTEM_TYPE": "S3",
   "FILESYSTEM_BACKUP_DIR": "/tmp/",
-  "NUMBER_OF_MESSAGE_PER_BACKUP_FILE": 50
+  "NUMBER_OF_MESSAGE_PER_BACKUP_FILE": 50,
+  "RETRY_UPLOAD_SECONDS": 100
 }
 ```
 
@@ -52,8 +53,6 @@ $ python3 backup.py config.json
 { "@timestamp": "2020-05-31 18:54:18,785","level": "INFO","thread": "Kafka Consumer","name": "root","message": "starting polling on ['davinder.test']" }
 { "@timestamp": "2020-05-31 18:54:18,798","level": "INFO","thread": "S3-Upload","name": "botocore.credentials","message": "Found credentials in environment variables." }
 { "@timestamp": "2020-05-31 18:54:18,922","level": "INFO","thread": "S3-Upload","name": "root","message": "waiting for new files to be generated" }
-{ "@timestamp": "2020-05-31 18:54:28,923","level": "INFO","thread": "S3-Upload","name": "root","message": "waiting for new files to be generated" }
-{ "@timestamp": "2020-05-31 18:54:38,924","level": "INFO","thread": "S3-Upload","name": "root","message": "waiting for new files to be generated" }
 { "@timestamp": "2020-05-31 18:54:46,433","level": "INFO","thread": "Kafka Consumer","name": "root","message": "Created Successful Backupfile /tmp/davinder.test/20200531-185446.tar.gz" }
 { "@timestamp": "2020-05-31 18:54:46,435","level": "INFO","thread": "Kafka Consumer","name": "root","message": "Created Successful Backup sha256 file of /tmp/davinder.test/20200531-185446.tar.gz.sha256" }
 { "@timestamp": "2020-05-31 18:54:47,260","level": "INFO","thread": "Kafka Consumer","name": "root","message": "Created Successful Backupfile /tmp/davinder.test/20200531-185447.tar.gz" }
@@ -67,7 +66,6 @@ $ python3 backup.py config.json
 { "@timestamp": "2020-05-31 18:54:49,601","level": "INFO","thread": "S3-Upload","name": "root","message": "upload done for /tmp/davinder.test/20200531-185448.tar.gz at destination path davinder.test/20200531-185448.tar.gz" }
 { "@timestamp": "2020-05-31 18:54:49,695","level": "INFO","thread": "S3-Upload","name": "root","message": "upload done for /tmp/davinder.test/20200531-185448.tar.gz.sha256 at destination path davinder.test/20200531-185448.tar.gz.sha256" }
 { "@timestamp": "2020-05-31 18:54:49,697","level": "INFO","thread": "S3-Upload","name": "root","message": "waiting for new files to be generated" }
-{ "@timestamp": "2020-05-31 18:54:59,697","level": "INFO","thread": "S3-Upload","name": "root","message": "waiting for new files to be generated" }
 ....
 ```
 

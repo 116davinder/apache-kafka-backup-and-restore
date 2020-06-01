@@ -41,7 +41,7 @@ class KBackup:
         while True:
             msg = _rt.poll(timeout=1.0)
             if msg is None:
-                # logging.info(f"waiting for new messages")
+                logging.debug(f"waiting for new messages")
                 continue
             if msg.error():
                 logging.error(f"{msg.error()}")
@@ -57,7 +57,6 @@ class KBackup:
                             Common.writeDataToKafkaBinFile(self.BACKUP_TMP_FILE, _msg, "w")
                         else:
                             Common.writeDataToKafkaBinFile(self.BACKUP_TMP_FILE, _msg, "a+")
-                _rt.commit(asynchronous=False)
             
             count += 1
 
@@ -81,8 +80,14 @@ def main():
             bucket = config['BUCKET_NAME']
             tmp_dir = config['FILESYSTEM_BACKUP_DIR']
             topic_name = config['TOPIC_NAMES'][0]
-            _upload_thread = threading.Thread(target=Upload.s3_upload_files,args=[bucket, tmp_dir, topic_name], name="S3-Upload")
-            _upload_thread.start()
+            try:
+                retry_upload_seconds = config['RETRY_UPLOAD_SECONDS']
+                logging.info(f"RETRY_UPLOAD_SECONDS is set to {config['RETRY_UPLOAD_SECONDS']}")
+            except:
+                logging.info(f"setting RETRY_UPLOAD_SECONDS to default 60 ")
+                retry_upload_seconds = 60
+            _s3_upload_thread = threading.Thread(target=Upload.s3_upload_files,args=[bucket, tmp_dir, topic_name,retry_upload_seconds], name="S3-Upload")
+            _s3_upload_thread.start()
         except KeyError as e:
             logging.error(f"unable to set s3 required variables {e}")
 
