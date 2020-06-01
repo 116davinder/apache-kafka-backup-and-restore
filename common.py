@@ -10,10 +10,10 @@ class Common:
     def readJsonConfig(file):
         try:
             with open(file) as cf:
-                logging.info(f'Successful loading of {file} file')
+                logging.info(f'loading of {file} file')
                 return json.load(cf)
-        except:
-            logging.error(f'unable to load {file}')
+        except json.decoder.JSONDecodeError as e:
+            logging.error(f'{e}')
             exit(1)
 
     def calculateSha256(file):

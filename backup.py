@@ -17,7 +17,9 @@ class KBackup:
             try:
                 self.NUMBER_OF_MESSAGE_PER_BACKUP_FILE = int(config['NUMBER_OF_MESSAGE_PER_BACKUP_FILE'])
             except:
-                logging.info(f"NUMBER_OF_MESSAGE_PER_BACKUP_FILE {str(config['NUMBER_OF_MESSAGE_PER_BACKUP_FILE'])} is not integer value")
+                logging.info(
+                    f"NUMBER_OF_MESSAGE_PER_BACKUP_FILE {str(config['NUMBER_OF_MESSAGE_PER_BACKUP_FILE'])} is not integer value"
+                )
                 self.NUMBER_OF_MESSAGE_PER_BACKUP_FILE = 50
                 logging.info(f"NUMBER_OF_MESSAGE_PER_BACKUP_FILE is set to default value 50")
 
@@ -37,11 +39,11 @@ class KBackup:
         Common.createBackupTopicDir(self.BACKUP_DIR)
 
         count = Common.currentMessageCountInBinFile(self.BACKUP_TMP_FILE)
-        logging.info(f"starting polling on {self.TOPIC_NAME_LIST[0]}")
+        logging.info(f"started polling on {self.TOPIC_NAME_LIST[0]}")
         while True:
             msg = _rt.poll(timeout=1.0)
             if msg is None:
-                logging.debug(f"waiting for new messages")
+                logging.debug(f"waiting for new messages from topic {self.TOPIC_NAME_LIST[0]}")
                 continue
             if msg.error():
                 logging.error(f"{msg.error()}")
@@ -72,7 +74,10 @@ def main():
     config = Common.readJsonConfig(sys.argv[1])
 
     b = KBackup(config)
-    _r_thread = threading.Thread(target=b.readFromTopic,name="Kafka Consumer")
+    _r_thread = threading.Thread(
+        target=b.readFromTopic,
+        name="Kafka Consumer"
+    )
     _r_thread.start()
 
     if config['FILESYSTEM_TYPE'] == "S3":
@@ -86,7 +91,11 @@ def main():
             except:
                 logging.info(f"setting RETRY_UPLOAD_SECONDS to default 60 ")
                 retry_upload_seconds = 60
-            _s3_upload_thread = threading.Thread(target=Upload.s3_upload_files,args=[bucket, tmp_dir, topic_name,retry_upload_seconds], name="S3-Upload")
+            _s3_upload_thread = threading.Thread(
+                target=Upload.s3_upload_files,
+                args=[bucket, tmp_dir, topic_name,retry_upload_seconds],
+                name="S3-Upload"
+            )
             _s3_upload_thread.start()
         except KeyError as e:
             logging.error(f"unable to set s3 required variables {e}")
