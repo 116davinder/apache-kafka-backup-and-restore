@@ -4,8 +4,9 @@ It will take backup of given topic and store that into either local filesystem o
 It will auto resume from same point from where it died if given consumer group name is same before and after crash.
 
 **Note**
-* it won't upload `current.bin` file to s3 which contains messages upto `NUMBER_OF_MESSAGE_PER_BACKUP_FILE - 1`.
-* upload to s3 is async method.
+* it will upload `current.bin` file to s3 which contains messages upto `NUMBER_OF_MESSAGE_PER_BACKUP_FILE`
+but will only upload with other backup files.
+* upload to s3 is background process and it depends on `RETRY_UPLOAD_SECONDS`.
 
 ## Requirements
 * confluent-kafka
