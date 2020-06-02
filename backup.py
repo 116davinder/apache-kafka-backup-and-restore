@@ -1,5 +1,5 @@
 import confluent_kafka
-from os import sys
+import os
 from common import Common
 import logging
 import threading
@@ -12,8 +12,8 @@ class KBackup:
             self.BOOTSTRAP_SERVERS = config['BOOTSTRAP_SERVERS']
             self.GROUP_ID = config['GROUP_ID']
             self.TOPIC_NAME_LIST = config['TOPIC_NAMES']
-            self.BACKUP_DIR = config['FILESYSTEM_BACKUP_DIR'] + self.TOPIC_NAME_LIST[0]
-            self.BACKUP_TMP_FILE = self.BACKUP_DIR + "/current.bin"
+            self.BACKUP_DIR = os.path(config['FILESYSTEM_BACKUP_DIR'], self.TOPIC_NAME_LIST[0])
+            self.BACKUP_TMP_FILE = os.path(self.BACKUP_DIR, "current.bin")
             try:
                 self.NUMBER_OF_MESSAGE_PER_BACKUP_FILE = int(config['NUMBER_OF_MESSAGE_PER_BACKUP_FILE'])
             except:
@@ -35,7 +35,6 @@ class KBackup:
     def readFromTopic(self):
         _rt = confluent_kafka.Consumer(self.CONSUMERCONFIG)
         _rt.subscribe(self.TOPIC_NAME_LIST)
-
         Common.createBackupTopicDir(self.BACKUP_DIR)
 
         count = Common.currentMessageCountInBinFile(self.BACKUP_TMP_FILE)
@@ -71,7 +70,7 @@ def main():
     )
     logging.getLogger().setLevel(logging.INFO)
 
-    config = Common.readJsonConfig(sys.argv[1])
+    config = Common.readJsonConfig(os.sys.argv[1])
 
     b = KBackup(config)
     _r_thread = threading.Thread(
