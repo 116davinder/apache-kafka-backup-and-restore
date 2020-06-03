@@ -27,12 +27,16 @@ class Common:
             return sha256(f.read()).hexdigest();
 
     def compareSha256withFile(file,hash):
-        with open(file) as f:
-            file_hash = f.readline()
-        if file_hash == hash:
-            return True
-        else:
-            return False
+        _file = file + ".sha256"
+        try:
+            with open(_file) as f:
+                file_hash = f.readline().strip()
+            if file_hash == hash:
+                return True
+        except FileNotFoundError as e:
+            logging.error(e)
+        
+        return False
 
     def createSha256OfBackupFile(file,hash):
         try:
@@ -44,8 +48,8 @@ class Common:
     def createBackupTopicDir(dir):
         try:
             os.mkdir(dir)
-        except FileExistsError:
-            logging.info(f'topic folder already exists {dir}')
+        except FileExistsError as e:
+            logging.info(e)
         except:
             logging.error(f'unable to create folder {dir}')
 

@@ -27,7 +27,7 @@ class KBackup:
             'group.id': self.GROUP_ID,
             'auto.offset.reset': 'earliest'
         }
-        logging.info(f"all required variables are successfully")
+        logging.info(f"successful loading of all variables")
 
     def readFromTopic(self):
         _rt = confluent_kafka.Consumer(self.CONSUMERCONFIG)
