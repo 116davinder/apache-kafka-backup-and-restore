@@ -7,10 +7,16 @@ import logging
 
 class Common:
 
+    def setLoggingFormat():
+        logging.basicConfig(
+            format='{ "@timestamp": "%(asctime)s","level": "%(levelname)s","thread": "%(threadName)s","name": "%(name)s","message": "%(message)s" }'
+        )
+        logging.getLogger().setLevel(logging.INFO)
+
     def readJsonConfig(file):
         try:
             with open(file) as cf:
-                logging.info(f'loading of {file} file')
+                logging.info(f'loading {file} file')
                 return json.load(cf)
         except json.decoder.JSONDecodeError as e:
             logging.error(f'{e}')
@@ -19,6 +25,14 @@ class Common:
     def calculateSha256(file):
         with open(file,"rb") as f:
             return sha256(f.read()).hexdigest();
+
+    def compareSha256withFile(file,hash):
+        with open(file) as f:
+            file_hash = f.readline()
+        if file_hash == hash:
+            return True
+        else:
+            return False
 
     def createSha256OfBackupFile(file,hash):
         try:

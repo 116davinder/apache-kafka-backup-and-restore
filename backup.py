@@ -8,33 +8,31 @@ from upload import Upload
 class KBackup:
     def __init__(self,config):
 
-        if config is not None:
-            self.BOOTSTRAP_SERVERS = config['BOOTSTRAP_SERVERS']
-            self.GROUP_ID = config['GROUP_ID']
-            self.TOPIC_NAME_LIST = config['TOPIC_NAMES']
-            self.BACKUP_DIR = os.path(config['FILESYSTEM_BACKUP_DIR'], self.TOPIC_NAME_LIST[0])
-            self.BACKUP_TMP_FILE = os.path(self.BACKUP_DIR, "current.bin")
-            try:
-                self.NUMBER_OF_MESSAGE_PER_BACKUP_FILE = int(config['NUMBER_OF_MESSAGE_PER_BACKUP_FILE'])
-            except:
-                logging.info(
-                    f"NUMBER_OF_MESSAGE_PER_BACKUP_FILE {str(config['NUMBER_OF_MESSAGE_PER_BACKUP_FILE'])} is not integer value"
-                )
-                self.NUMBER_OF_MESSAGE_PER_BACKUP_FILE = 50
-                logging.info(f"NUMBER_OF_MESSAGE_PER_BACKUP_FILE is set to default value 50")
+        self.BOOTSTRAP_SERVERS = config['BOOTSTRAP_SERVERS']
+        self.GROUP_ID = config['GROUP_ID']
+        self.TOPIC_NAME_LIST = config['TOPIC_NAMES']
+        self.BACKUP_DIR = os.path.join(config['FILESYSTEM_BACKUP_DIR'], self.TOPIC_NAME_LIST[0])
+        self.BACKUP_TMP_FILE = os.path.join(self.BACKUP_DIR, "current.bin")
+        try:
+            self.NUMBER_OF_MESSAGE_PER_BACKUP_FILE = int(config['NUMBER_OF_MESSAGE_PER_BACKUP_FILE'])
+        except:
+            logging.info(
+                f"NUMBER_OF_MESSAGE_PER_BACKUP_FILE {str(config['NUMBER_OF_MESSAGE_PER_BACKUP_FILE'])} is not integer value"
+            )
+            self.NUMBER_OF_MESSAGE_PER_BACKUP_FILE = 50
+            logging.info(f"NUMBER_OF_MESSAGE_PER_BACKUP_FILE is set to default value 50")
 
-            self.CONSUMERCONFIG = {
-                'bootstrap.servers': self.BOOTSTRAP_SERVERS,
-                'group.id': self.GROUP_ID,
-                'auto.offset.reset': 'earliest'
-            }
-            logging.info(f"all required variables are successfully")
-        else:
-            logging.error(f"all required variables are not successfully")
+        self.CONSUMERCONFIG = {
+            'bootstrap.servers': self.BOOTSTRAP_SERVERS,
+            'group.id': self.GROUP_ID,
+            'auto.offset.reset': 'earliest'
+        }
+        logging.info(f"all required variables are successfully")
 
     def readFromTopic(self):
         _rt = confluent_kafka.Consumer(self.CONSUMERCONFIG)
         _rt.subscribe(self.TOPIC_NAME_LIST)
+
         Common.createBackupTopicDir(self.BACKUP_DIR)
 
         count = Common.currentMessageCountInBinFile(self.BACKUP_TMP_FILE)
@@ -65,12 +63,13 @@ class KBackup:
 
 
 def main():
-    logging.basicConfig(
-        format='{ "@timestamp": "%(asctime)s","level": "%(levelname)s","thread": "%(threadName)s","name": "%(name)s","message": "%(message)s" }'
-    )
-    logging.getLogger().setLevel(logging.INFO)
 
-    config = Common.readJsonConfig(os.sys.argv[1])
+    Common.setLoggingFormat()
+    try:
+        config = Common.readJsonConfig(os.sys.argv[1])
+    except IndexError as e:
+        logging.error(f"backup.json is not passed")
+        exit(1)
 
     b = KBackup(config)
     _r_thread = threading.Thread(
