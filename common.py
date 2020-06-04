@@ -15,7 +15,7 @@ class Common:
 
     def listFiles(dir):
         try:
-            return os.listdir(dir)
+            return sorted(os.listdir(dir))
         except:
             return []
 

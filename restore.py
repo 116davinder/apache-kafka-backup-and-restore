@@ -2,6 +2,7 @@ from common import Common
 import os
 import logging
 import tarfile
+import threading
 
 class KRestore:
 
@@ -35,6 +36,10 @@ def main():
         exit(1)
 
     b = KRestore(config)
-    b.writeToKafka()
+    _wtk = threading.Thread(
+        target=b.writeToKafka,
+        name="Kafka Producer"
+    )
+    _wtk.start()
 
 main()
