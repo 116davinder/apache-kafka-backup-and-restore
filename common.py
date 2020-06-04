@@ -13,6 +13,12 @@ class Common:
         )
         logging.getLogger().setLevel(logging.INFO)
 
+    def listFiles(dir):
+        try:
+            return os.listdir(dir)
+        except:
+            return []
+
     def readJsonConfig(file):
         try:
             with open(file) as cf:
@@ -25,18 +31,6 @@ class Common:
     def calculateSha256(file):
         with open(file,"rb") as f:
             return sha256(f.read()).hexdigest();
-
-    def compareSha256withFile(file,hash):
-        _file = file + ".sha256"
-        try:
-            with open(_file) as f:
-                file_hash = f.readline().strip()
-            if file_hash == hash:
-                return True
-        except FileNotFoundError as e:
-            logging.error(e)
-        
-        return False
 
     def createSha256OfBackupFile(file,hash):
         try:
@@ -88,3 +82,30 @@ class Common:
         logging.info(f"Created Successful Backupfile {_file_tar_gz}")
         Common.createSha256OfBackupFile(_file_tar_gz,Common.calculateSha256(_file_tar_gz))
         logging.info(f"Created Successful Backup sha256 file of {_file_tar_gz}.sha256")
+
+    def isSha256HashMatched(file, hashfile):
+        try:
+            with open(hashfile) as f:
+                file_hash = f.readline().strip()
+                if Common.calculateSha256(file) == file_hash:
+                    return True
+        except FileNotFoundError as e:
+            logging.error(e)
+        
+        return False
+
+    def openTarFile(file,extractDir):
+        _sname = os.path.basename(file).split(".")[0] + ".bin"
+        try:
+            os.remove(os.path.join(extractDir,_sname))
+        except FileNotFoundError:
+            pass
+
+        try:
+            _et = tarfile.open(file)
+            _et.extract(_sname, extractDir)
+            return True
+        except FileNotFoundError as e:
+            logging.error(e)
+
+        return False

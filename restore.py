@@ -1,6 +1,7 @@
 from common import Common
 import os
 import logging
+import tarfile
 
 class KRestore:
 
@@ -14,23 +15,14 @@ class KRestore:
         }
         logging.info(f"successful loading of all variables")
 
-    def matchHashforFiles(self):
-        _hash_matched_files_list = []
-        try:
-            _list_all_Files = os.listdir(self.BACKUP_DIR)
-            if len(_list_all_Files) > 0:
-                for file in _list_all_Files:
-                    if file.endswith("tar.gz"):
-                        _current_file_path = os.path.join(self.BACKUP_DIR , file)
-                        _current_file_hash = Common.calculateSha256(_current_file_path)
-                        if Common.compareSha256withFile(_current_file_path,_current_file_hash):
-                            _hash_matched_files_list.append(_current_file_path)
-                        else:
-                            logging.error(f"hash value from {_current_file_path}.sha256 didn't matched with {_current_file_hash}")
-        except FileNotFoundError as e:
-            logging.error(e)
-        
-        return sorted(_hash_matched_files_list)
+    def writeToKafka(self):
+        _files_in_backup_dir = Common.listFiles(self.BACKUP_DIR)
+        for file in _files_in_backup_dir:
+            if file.endswith(".tar.gz"):
+                file = os.path.join(self.BACKUP_DIR,file)
+                _sha_file = file + ".sha256"
+                if Common.isSha256HashMatched(file,_sha_file):
+                    logging.info(f"reading file & writing to kafka {file}")
 
 def main():
 
@@ -43,6 +35,6 @@ def main():
         exit(1)
 
     b = KRestore(config)
-    print(b.matchHashforFiles())
+    b.writeToKafka()
 
 main()
