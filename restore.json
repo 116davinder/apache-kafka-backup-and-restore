@@ -1,0 +1,7 @@
+{
+  "BOOTSTRAP_SERVERS": "localhost:9092",
+  "RESTORE_TOPIC_NAME": "davinder-restore.test",
+  "FILESYSTEM_TYPE": "LINUX",
+  "FILESYSTEM_BACKUP_DIR": "/tmp/davinder.test",
+  "RETRY_SECONDS": 100
+}
