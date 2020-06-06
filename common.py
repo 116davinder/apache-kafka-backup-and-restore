@@ -16,8 +16,10 @@ class Common:
     def listFiles(dir):
         try:
             return sorted(os.listdir(dir))
-        except:
-            return []
+        except FileNotFoundError as e:
+            logging.error(e)
+        
+        return []
 
     def readJsonConfig(file):
         try:
@@ -29,8 +31,12 @@ class Common:
             exit(1)
 
     def calculateSha256(file):
-        with open(file,"rb") as f:
-            return sha256(f.read()).hexdigest();
+        try:
+            with open(file,"rb") as f:
+                return sha256(f.read()).hexdigest();
+        except FileNotFoundError as e:
+            logging.error(e)
+        return None
 
     def createSha256OfBackupFile(file,hash):
         try:
@@ -46,20 +52,24 @@ class Common:
             logging.info(e)
         except:
             logging.error(f'unable to create folder {dir}')
+            exit(1)
 
     def currentMessageCountInBinFile(file):
         try:
             with open(file) as f:
                 return sum(1 for _ in f)
-        except:
-            return 0
+        except FileNotFoundError as e:
+            logging.error(e)
+        
+        return 0
 
     def decodeMsgToUtf8(msg):
         try:
             return msg.value().decode('utf-8')
         except:
             logging.error(f'decoding msg to utf-8 failed')
-            return None
+        
+        return None
 
     def writeDataToKafkaBinFile(file,msg,mode):
         try:
@@ -80,8 +90,10 @@ class Common:
             logging.error(f'unable to create/write to {_file_tar_gz}')
 
         logging.info(f"Created Successful Backupfile {_file_tar_gz}")
-        Common.createSha256OfBackupFile(_file_tar_gz,Common.calculateSha256(_file_tar_gz))
-        logging.info(f"Created Successful Backup sha256 file of {_file_tar_gz}.sha256")
+        _hash = Common.calculateSha256(_file_tar_gz)
+        if _hash is not None:
+            Common.createSha256OfBackupFile(_file_tar_gz,_hash)
+            logging.info(f"Created Successful Backup sha256 file of {_file_tar_gz}.sha256")
 
     def isSha256HashMatched(file, hashfile):
         try:
@@ -94,18 +106,20 @@ class Common:
         
         return False
 
-    def openTarFile(file,extractDir):
-        _sname = os.path.basename(file).split(".")[0] + ".bin"
-        try:
-            os.remove(os.path.join(extractDir,_sname))
-        except FileNotFoundError:
-            pass
+    def extractBinFile(file,hashfile,extractDir):
+        
+        if Common.isSha256HashMatched(file,hashfile):
+            _sname = os.path.basename(file).split(".")[0] + ".bin"
+            try:
+                _et = tarfile.open(file)
+                _et.extract(_sname, extractDir)
+                try:    
+                    os.remove(file)
+                    os.remove(hashfile)
+                except FileNotFoundError:
+                    pass
 
-        try:
-            _et = tarfile.open(file)
-            _et.extract(_sname, extractDir)
-            return True
-        except FileNotFoundError as e:
-            logging.error(e)
-
-        return False
+                return os.path.join(extractDir,_sname)
+            except FileNotFoundError as e:
+                logging.error(e)
+        return None

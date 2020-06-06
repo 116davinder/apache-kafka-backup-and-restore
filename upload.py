@@ -5,21 +5,15 @@ import sys
 import os
 import time
 import threading
+from common import Common
 
 class Upload:
-
-    def list_files(dir):
-        try:
-            _list = os.listdir(dir)
-            return _list
-        except FileNotFoundError:
-            return []
 
     def s3_upload_files(bucket,dir,topic_name,retry_upload_seconds):
         s3_client = boto3.client('s3')
         topic_dir = os.path.join(dir, topic_name)
         while True:
-            _list = Upload.list_files(topic_dir)
+            _list = Common.listFiles(topic_dir)
             if len(_list) > 1:
                 for f in _list:
                         file_path = os.path.join(topic_dir, f)

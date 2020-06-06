@@ -29,16 +29,16 @@ class KBackup:
         }
         logging.info(f"successful loading of all variables")
 
-    def readFromTopic(self):
-        _rt = confluent_kafka.Consumer(self.CONSUMERCONFIG)
-        _rt.subscribe(self.TOPIC_NAME_LIST)
+    def backup(self):
+        _bt = confluent_kafka.Consumer(self.CONSUMERCONFIG)
+        _bt.subscribe(self.TOPIC_NAME_LIST)
 
         Common.createBackupTopicDir(self.BACKUP_DIR)
 
         count = Common.currentMessageCountInBinFile(self.BACKUP_TMP_FILE)
         logging.info(f"started polling on {self.TOPIC_NAME_LIST[0]}")
         while True:
-            msg = _rt.poll(timeout=1.0)
+            msg = _bt.poll(timeout=1.0)
             if msg is None:
                 logging.debug(f"waiting for new messages from topic {self.TOPIC_NAME_LIST[0]}")
                 continue
@@ -59,7 +59,7 @@ class KBackup:
             
             count += 1
 
-        _rt.close()
+        _bt.close()
 
 
 def main():
@@ -73,7 +73,7 @@ def main():
 
     b = KBackup(config)
     _r_thread = threading.Thread(
-        target=b.readFromTopic,
+        target=b.backup,
         name="Kafka Consumer"
     )
     _r_thread.start()
@@ -85,9 +85,9 @@ def main():
             topic_name = config['TOPIC_NAMES'][0]
             try:
                 retry_upload_seconds = config['RETRY_UPLOAD_SECONDS']
-                logging.info(f"RETRY_UPLOAD_SECONDS is set to {config['RETRY_UPLOAD_SECONDS']}")
+                logging.debug(f"RETRY_UPLOAD_SECONDS is set to {config['RETRY_UPLOAD_SECONDS']}")
             except:
-                logging.info(f"setting RETRY_UPLOAD_SECONDS to default 60 ")
+                logging.debug(f"setting RETRY_UPLOAD_SECONDS to default 60 ")
                 retry_upload_seconds = 60
             _s3_upload_thread = threading.Thread(
                 target=Upload.s3_upload_files,
