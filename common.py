@@ -7,11 +7,11 @@ import logging
 
 class Common:
 
-    def setLoggingFormat():
+    def setLoggingFormat(level=20):
         logging.basicConfig(
             format='{ "@timestamp": "%(asctime)s","level": "%(levelname)s","thread": "%(threadName)s","name": "%(name)s","message": "%(message)s" }'
         )
-        logging.getLogger().setLevel(logging.INFO)
+        logging.getLogger().setLevel(level)
 
     def listFiles(dir):
         try:
@@ -24,7 +24,7 @@ class Common:
     def readJsonConfig(file):
         try:
             with open(file) as cf:
-                logging.info(f'loading {file} file')
+                logging.debug(f'loading {file} file')
                 return json.load(cf)
         except json.decoder.JSONDecodeError as e:
             logging.error(f'{e}')
@@ -49,7 +49,7 @@ class Common:
         try:
             os.mkdir(dir)
         except FileExistsError as e:
-            logging.info(e)
+            logging.debug(e)
         except:
             logging.error(f'unable to create folder {dir}')
             exit(1)

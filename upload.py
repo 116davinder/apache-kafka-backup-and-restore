@@ -1,10 +1,8 @@
 import logging
 import boto3
 from botocore.exceptions import ClientError
-import sys
 import os
 import time
-import threading
 from common import Common
 
 class Upload:
