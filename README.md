@@ -8,7 +8,8 @@ but will only upload with other backup files.
 * `NUMBER_OF_KAFKA_THREADS` is used to parallelise reading from kafka topic.
 It should not be more than number of partitions.
 * `LOG_LEVEL` values can be found https://docs.python.org/3/library/logging.html#logging-levels
-
+* `NUMBER_OF_MESSAGE_PER_BACKUP_FILE` will try to keep this number consistent in file
+but if application got restarted then it may be vary for first back file.
 
 **Restore Application**
 * it will restore from backup dir into given topic.

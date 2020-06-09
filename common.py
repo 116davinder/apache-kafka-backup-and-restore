@@ -45,7 +45,7 @@ class Common:
         except:
             logging.error(f'unable to write to {file}.sha256')
 
-    def createBackupTopicDir(dir):
+    def createDir(dir):
         try:
             os.mkdir(dir)
         except FileExistsError as e:
@@ -123,3 +123,9 @@ class Common:
             except FileNotFoundError as e:
                 logging.error(e)
         return None
+
+    def findNumberOfPartitionsInTopic(cn):
+        _lp = []
+        for i in cn.list_topics().topics[tn].partitions:
+            _lp.append(i):
+        return _lp

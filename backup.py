@@ -36,16 +36,12 @@ class KBackup:
 
         logging.debug(f"successful loading of all variables")
 
-    def createPartitionBackupFolder(cn,tn,dir):
-        for i in cn.list_topics().topics[tn].partitions:
-            partition_dir = os.path.join(dir, str(i))
-            Common.createBackupTopicDir(partition_dir)
-
     def backup(self):
         _bt = confluent_kafka.Consumer(self.CONSUMERCONFIG)
         _bt.subscribe(self.TOPIC_NAME_LIST)
 
-        KBackup.createPartitionBackupFolder(_bt,self.TOPIC_NAME_LIST[0],self.BACKUP_DIR)
+        for p in Common.findNumberOfPartitionsInTopic(_bt):
+            Common.createDir(os.path.join(self.BACKUP_DIR, str(p)))
 
         count = 0
         logging.info(f"started polling on {self.TOPIC_NAME_LIST[0]}")
