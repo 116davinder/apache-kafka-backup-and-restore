@@ -13,7 +13,7 @@ class Common:
         )
         logging.getLogger().setLevel(level)
 
-    def listFiles(dir):
+    def listDirs(dir):
         try:
             return sorted(os.listdir(dir))
         except FileNotFoundError as e:
@@ -124,8 +124,8 @@ class Common:
                 logging.error(e)
         return None
 
-    def findNumberOfPartitionsInTopic(cn):
+    def findNumberOfPartitionsInTopic(list):
         _lp = []
-        for i in cn.list_topics().topics[tn].partitions:
-            _lp.append(i):
+        for i in list:
+            _lp.append(i)
         return _lp

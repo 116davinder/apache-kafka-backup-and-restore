@@ -3,7 +3,7 @@ import os
 from common import Common
 import logging
 import threading
-from upload import Upload
+from cloud import Upload
 
 class KBackup:
     def __init__(self,config):
@@ -40,7 +40,7 @@ class KBackup:
         _bt = confluent_kafka.Consumer(self.CONSUMERCONFIG)
         _bt.subscribe(self.TOPIC_NAME_LIST)
 
-        for p in Common.findNumberOfPartitionsInTopic(_bt):
+        for p in Common.findNumberOfPartitionsInTopic(_bt.list_topics().topics[self.TOPIC_NAME_LIST[0]].partitions):
             Common.createDir(os.path.join(self.BACKUP_DIR, str(p)))
 
         count = 0
@@ -105,12 +105,14 @@ def main():
             except:
                 logging.debug(f"setting RETRY_UPLOAD_SECONDS to default 60 ")
                 retry_upload_seconds = 60
-            _s3_upload_thread = threading.Thread(
+            
+            _s3_upload = threading.Thread(
                 target=Upload.s3_upload_files,
-                args=[bucket, tmp_dir, topic_name,retry_upload_seconds],
-                name="S3-Upload"
+                args=[bucket,tmp_dir,topic_name,"*",retry_upload_seconds],
+                name="S3 Upload"
             )
-            _s3_upload_thread.start()
+            _s3_upload.start()
+
         except KeyError as e:
             logging.error(f"unable to set s3 required variables {e}")
 

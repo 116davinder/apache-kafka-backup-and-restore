@@ -37,7 +37,7 @@ python3 backup.py backup.json
   "FILESYSTEM_BACKUP_DIR": "/tmp/",
   "NUMBER_OF_MESSAGE_PER_BACKUP_FILE": 1000,
   "RETRY_UPLOAD_SECONDS": 100,
-  "NUMBER_OF_KAFKA_THREADS": 2,
+  "NUMBER_OF_KAFKA_THREADS": 3,
   "LOG_LEVEL": 20
 }
 ```
@@ -52,7 +52,7 @@ python3 backup.py backup.json
   "FILESYSTEM_BACKUP_DIR": "/tmp/",
   "NUMBER_OF_MESSAGE_PER_BACKUP_FILE": 1000,
   "RETRY_UPLOAD_SECONDS": 100,
-  "NUMBER_OF_KAFKA_THREADS": 2,
+  "NUMBER_OF_KAFKA_THREADS": 3,
   "LOG_LEVEL": 20
 }
 ```
@@ -72,11 +72,14 @@ python3 backup.py backup.json
 **Example S3 Backup Run Output**
 ```
 $ python3 backup.py backup.json
-{ "@timestamp": "2020-06-01 10:37:00,168","level": "INFO","thread": "MainThread","name": "root","message": "Successful loading of config.json file" }
-{ "@timestamp": "2020-06-01 10:37:00,169","level": "INFO","thread": "MainThread","name": "root","message": "all required variables are successfully" }
-{ "@timestamp": "2020-06-01 10:37:00,187","level": "INFO","thread": "Kafka Consumer","name": "root","message": "starting polling on davinder.test" }
-{ "@timestamp": "2020-06-01 10:38:17,291","level": "INFO","thread": "Kafka Consumer","name": "root","message": "Created Successful Backupfile /tmp/davinder.test/20200601-103817.tar.gz" }
-{ "@timestamp": "2020-06-01 10:39:00,631","level": "INFO","thread": "S3-Upload","name": "root","message": "upload successful at s3://davinder-test-kafka-backup/davinder.test/20200601-103817.tar.gz" }
+{ "@timestamp": "2020-06-10 12:49:43,871","level": "INFO","thread": "S3 Upload","name": "botocore.credentials","message": "Found credentials in environment variables." }
+{ "@timestamp": "2020-06-10 12:49:43,912","level": "INFO","thread": "Kafka Consumer 1","name": "root","message": "started polling on davinder.test" }
+{ "@timestamp": "2020-06-10 12:49:43,915","level": "INFO","thread": "Kafka Consumer 0","name": "root","message": "started polling on davinder.test" }
+{ "@timestamp": "2020-06-10 12:49:43,916","level": "INFO","thread": "Kafka Consumer 2","name": "root","message": "started polling on davinder.test" }
+{ "@timestamp": "2020-06-10 12:49:44,307","level": "INFO","thread": "S3 Upload","name": "root","message": "upload successful at s3://davinder-test-kafka-backup/davinder.test/0/20200608-102909.tar.gz" }
+{ "@timestamp": "2020-06-10 12:49:45,996","level": "INFO","thread": "S3 Upload","name": "root","message": "waiting for new files to be generated" }
+{ "@timestamp": "2020-06-10 12:52:33,130","level": "INFO","thread": "Kafka Consumer 0","name": "root","message": "Created Successful Backupfile /tmp/davinder.test/0/20200610-125233.tar.gz" }
+{ "@timestamp": "2020-06-10 12:52:33,155","level": "INFO","thread": "Kafka Consumer 0","name": "root","message": "Created Successful Backup sha256 file of /tmp/davinder.test/0/20200610-125233.tar.gz.sha256" }
 ....
 ```
 
