@@ -6,7 +6,6 @@ import time
 from common import Common
 import pathlib
 import threading
-import more_itertools
 
 class Upload:
 
