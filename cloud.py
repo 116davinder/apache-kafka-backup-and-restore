@@ -29,7 +29,6 @@ class Upload:
 
     def s3_upload(bucket,dir,topic_name,retry_upload_seconds,thread_count):
         s3_client = boto3.client('s3')
-        count = 0
         while True:
             _topic_dir = os.path.join(dir, topic_name)
             _count_partition_dirs = len(Common.listDirs(_topic_dir))
@@ -44,7 +43,6 @@ class Upload:
                             args=[s3_client,bucket,file_name,object_name],
                             name="S3 Upload Threads"
                         ).start()
-                        count += 1
             else:
                 logging.info(f"s3 upload retry for new files in {retry_upload_seconds} seconds")
                 time.sleep(retry_upload_seconds)
