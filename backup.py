@@ -106,12 +106,7 @@ def main():
                 logging.debug(f"setting RETRY_UPLOAD_SECONDS to default 60 ")
                 retry_upload_seconds = 60
             
-            _s3_upload = threading.Thread(
-                target=Upload.s3_upload_files,
-                args=[bucket,tmp_dir,topic_name,"*",retry_upload_seconds],
-                name="S3 Upload"
-            )
-            _s3_upload.start()
+            Upload.s3_upload(bucket,tmp_dir,topic_name,retry_upload_seconds,b.NUMBER_OF_KAFKA_THREADS + 1)
 
         except KeyError as e:
             logging.error(f"unable to set s3 required variables {e}")
