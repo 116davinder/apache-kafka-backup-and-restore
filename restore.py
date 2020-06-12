@@ -33,7 +33,7 @@ class KRestore:
     def restore(self):
         _rt = confluent_kafka.Producer(self.PRODUCERCONFIG)
         while True:
-            _files_in_backup_dir = Common.listFiles(self.BACKUP_DIR)
+            _files_in_backup_dir = Common.listDirs(self.BACKUP_DIR)
             for file in _files_in_backup_dir:
                     file = os.path.join(self.BACKUP_DIR,file)
                     if file.endswith("tar.gz"):

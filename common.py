@@ -7,13 +7,13 @@ import logging
 
 class Common:
 
-    def setLoggingFormat():
+    def setLoggingFormat(level=20):
         logging.basicConfig(
             format='{ "@timestamp": "%(asctime)s","level": "%(levelname)s","thread": "%(threadName)s","name": "%(name)s","message": "%(message)s" }'
         )
-        logging.getLogger().setLevel(logging.INFO)
+        logging.getLogger().setLevel(level)
 
-    def listFiles(dir):
+    def listDirs(dir):
         try:
             return sorted(os.listdir(dir))
         except FileNotFoundError as e:
@@ -24,7 +24,7 @@ class Common:
     def readJsonConfig(file):
         try:
             with open(file) as cf:
-                logging.info(f'loading {file} file')
+                logging.debug(f'loading {file} file')
                 return json.load(cf)
         except json.decoder.JSONDecodeError as e:
             logging.error(f'{e}')
@@ -45,11 +45,11 @@ class Common:
         except:
             logging.error(f'unable to write to {file}.sha256')
 
-    def createBackupTopicDir(dir):
+    def createDir(dir):
         try:
             os.mkdir(dir)
         except FileExistsError as e:
-            logging.info(e)
+            logging.debug(e)
         except:
             logging.error(f'unable to create folder {dir}')
             exit(1)
@@ -123,3 +123,9 @@ class Common:
             except FileNotFoundError as e:
                 logging.error(e)
         return None
+
+    def findNumberOfPartitionsInTopic(list):
+        _lp = []
+        for i in list:
+            _lp.append(i)
+        return _lp
