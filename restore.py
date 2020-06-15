@@ -1,10 +1,10 @@
-from common import Common
 import os
 import logging
 import tarfile
 import threading
 import confluent_kafka
 import time
+from common import common
 
 class KRestore:
 
@@ -33,14 +33,14 @@ class KRestore:
     def restore(self):
         _rt = confluent_kafka.Producer(self.PRODUCERCONFIG)
         while True:
-            _files_in_backup_dir = Common.listDirs(self.BACKUP_DIR)
+            _files_in_backup_dir = common.listDirs(self.BACKUP_DIR)
             for file in _files_in_backup_dir:
                     file = os.path.join(self.BACKUP_DIR,file)
                     if file.endswith("tar.gz"):
                         logging.debug(f"processing file {file}")
                         _sha_file = file + ".sha256"
                         if os.path.getsize(file) > 0 and os.path.exists(_sha_file):
-                            binFile = Common.extractBinFile(file,_sha_file,self.BACKUP_DIR)
+                            binFile = common.extractBinFile(file,_sha_file,self.BACKUP_DIR)
                             if binFile is not None:
                                 with open(binFile) as _f:
                                     for line in _f.readlines():
@@ -63,10 +63,10 @@ class KRestore:
 
 def main():
 
-    Common.setLoggingFormat()
+    common.setLoggingFormat()
 
     try:
-        config = Common.readJsonConfig(os.sys.argv[1])
+        config = common.readJsonConfig(os.sys.argv[1])
     except IndexError as e:
         logging.error(f"restore.json is not passed")
         exit(1)

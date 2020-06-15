@@ -1,9 +1,9 @@
 import confluent_kafka
 import os
-from common import Common
 import logging
 import threading
-from cloud import Upload
+from cloud.aws import Upload
+from common import common
 
 class KBackup:
     def __init__(self,config):
@@ -40,8 +40,8 @@ class KBackup:
         _bt = confluent_kafka.Consumer(self.CONSUMERCONFIG)
         _bt.subscribe(self.TOPIC_NAME_LIST)
 
-        for p in Common.findNumberOfPartitionsInTopic(_bt.list_topics().topics[self.TOPIC_NAME_LIST[0]].partitions):
-            Common.createDir(os.path.join(self.BACKUP_DIR, str(p)))
+        for p in common.findNumberOfPartitionsInTopic(_bt.list_topics().topics[self.TOPIC_NAME_LIST[0]].partitions):
+            common.createDir(os.path.join(self.BACKUP_DIR, str(p)))
 
         count = 0
         logging.info(f"started polling on {self.TOPIC_NAME_LIST[0]}")
@@ -56,16 +56,16 @@ class KBackup:
             if msg.partition() is not None:
                 _tmp_file = os.path.join(self.BACKUP_DIR, str(msg.partition()) ,"current.bin")
                 _tar_location = os.path.join(self.BACKUP_DIR, str(msg.partition()))
-                _msg = Common.decodeMsgToUtf8(msg)
+                _msg = common.decodeMsgToUtf8(msg)
                 if _msg is not None:
                     if count == 0:
-                        Common.writeDataToKafkaBinFile(_tmp_file, _msg, "a+")
+                        common.writeDataToKafkaBinFile(_tmp_file, _msg, "a+")
                     if count > 0:
                         if count % self.NUMBER_OF_MESSAGE_PER_BACKUP_FILE == 0:
-                            Common.createTarGz(_tar_location, _tmp_file)
-                            Common.writeDataToKafkaBinFile(_tmp_file, _msg, "w")
+                            common.createTarGz(_tar_location, _tmp_file)
+                            common.writeDataToKafkaBinFile(_tmp_file, _msg, "w")
                         else:
-                            Common.writeDataToKafkaBinFile(_tmp_file, _msg, "a+")
+                            common.writeDataToKafkaBinFile(_tmp_file, _msg, "a+")
             else:
                 logging.error(f"no partition found for message")
 
@@ -76,15 +76,15 @@ class KBackup:
 
 def main():
 
-    Common.setLoggingFormat()
+    common.setLoggingFormat()
     try:
-        config = Common.readJsonConfig(os.sys.argv[1])
+        config = common.readJsonConfig(os.sys.argv[1])
     except IndexError as e:
         logging.error(f"backup.json is not passed")
         exit(1)
 
     b = KBackup(config)
-    Common.setLoggingFormat(b.LOG_LEVEL)
+    common.setLoggingFormat(b.LOG_LEVEL)
 
     for _r_thread in range(b.NUMBER_OF_KAFKA_THREADS):
         _r_thread = threading.Thread(
