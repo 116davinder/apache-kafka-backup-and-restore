@@ -97,16 +97,16 @@ def createTarGz(dir,file):
         logging.error(f'unable to create/write to {_file_tar_gz}')
 
     logging.info(f"Created Successful Backupfile {_file_tar_gz}")
-    _hash = Common.calculateSha256(_file_tar_gz)
+    _hash = calculateSha256(_file_tar_gz)
     if _hash is not None:
-        Common.createSha256OfBackupFile(_file_tar_gz,_hash)
+        createSha256OfBackupFile(_file_tar_gz,_hash)
         logging.info(f"Created Successful Backup sha256 file of {_file_tar_gz}.sha256")
 
 def isSha256HashMatched(file, hashfile):
     try:
         with open(hashfile) as f:
             file_hash = f.readline().strip()
-            if Common.calculateSha256(file) == file_hash:
+            if calculateSha256(file) == file_hash:
                 return True
     except FileNotFoundError as e:
         logging.error(e)
@@ -115,7 +115,7 @@ def isSha256HashMatched(file, hashfile):
 
 def extractBinFile(file,hashfile,extractDir):
     
-    if Common.isSha256HashMatched(file,hashfile):
+    if isSha256HashMatched(file,hashfile):
         _sname = os.path.basename(file).split(".")[0] + ".bin"
         try:
             _et = tarfile.open(file)
