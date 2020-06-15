@@ -103,6 +103,8 @@ $ python3 backup.py backup.json
 ```
 
 # How to Run Kafka Restore Application
+`It is in progress, it may not work`
+
 ```
 export AWS_SECRET_ACCESS_KEY=XXXXXXXXXXXXXXX
 export AWS_ACCESS_KEY_ID=XXXXXXXXXXXXX

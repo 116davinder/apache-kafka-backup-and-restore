@@ -42,6 +42,7 @@ class Download:
 
     def s3_read_checkpoint_partition(dir,topic,partition):
         try:
+            logging.info(os.path.join(dir,topic,partition,"checkpoint"))
             with open(os.path.join(dir,topic,partition,"checkpoint")) as c:
                 return c.readline().strip()
         except FileNotFoundError as e:
@@ -65,5 +66,15 @@ class Download:
         except:
             return None
 
-    def s3_download(s3_client,bucket,topic):
-        pass
+    def s3_download(bucket,topic,tmp_dir):
+        s3_client = boto3.client('s3')
+        _pc = Download.s3_count_partitions(s3_client,bucket,topic)
+        if _pc is not None:
+            for _pt in range(_pc):
+                _ck = Download.s3_read_checkpoint_partition(tmp_dir,topic,str(_pt))
+                if _ck is not None:
+                    logging.info(f"starting download from s3 from checkpoint {_ck} partition {_pt}")
+                else:
+                    logging.info(f"reading all files from s3 for partition {_pt}")
+        else:
+            logging.error("No Partitions found")

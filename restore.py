@@ -5,14 +5,16 @@ import threading
 import confluent_kafka
 import time
 from common import common
+from cloud.aws import Download
 
 class KRestore:
 
     def __init__(self,config):
         self.BOOTSTRAP_SERVERS = config['BOOTSTRAP_SERVERS']
+        self.BACKUP_TOPIC_NAME = config['BACKUP_TOPIC_NAME']
         self.RESTORE_TOPIC_NAME = config['RESTORE_TOPIC_NAME']
         self.BACKUP_DIR = config['FILESYSTEM_BACKUP_DIR']
-        self.BACKUP_TMP_FILE = os.path.join(self.BACKUP_DIR, "current.bin")
+
         self.PRODUCERCONFIG = {
             'bootstrap.servers': self.BOOTSTRAP_SERVERS,
             'enable.idempotence': True,
@@ -21,6 +23,12 @@ class KRestore:
             self.RETRY_SECONDS = config['RETRY_SECONDS']
         except:
             self.RETRY_SECONDS = 60
+        
+        self.FILESYSTEM_TYPE = config['FILESYSTEM_TYPE']
+
+        if self.FILESYSTEM_TYPE == "S3":
+            self.BUCKET_NAME = config['BUCKET_NAME']
+            self.FILESYSTEM_BACKUP_DIR = config['FILESYSTEM_BACKUP_DIR']
 
         logging.info(f"successful loading of all variables")
 
@@ -33,7 +41,7 @@ class KRestore:
     def restore(self):
         _rt = confluent_kafka.Producer(self.PRODUCERCONFIG)
         while True:
-            _files_in_backup_dir = common.listDirs(self.BACKUP_DIR)
+            _files_in_backup_dir = common.listDirs(os.path.join(self.BACKUP_DIR,self.BACKUP_TOPIC_NAME))
             for file in _files_in_backup_dir:
                     file = os.path.join(self.BACKUP_DIR,file)
                     if file.endswith("tar.gz"):
@@ -72,10 +80,11 @@ def main():
         exit(1)
 
     b = KRestore(config)
+    Download.s3_download(b.BUCKET_NAME, b.BACKUP_TOPIC_NAME,b.FILESYSTEM_BACKUP_DIR)
+
     _wtk = threading.Thread(
         target=b.restore,
         name="Kafka Producer"
-    )
-    _wtk.start()
+    ).start()
 
 main()
