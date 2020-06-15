@@ -1,6 +1,6 @@
 .*
 __*
-*/__*
+*/__pycache*
 aws.props
 b1.json
 r1.json
