@@ -97,6 +97,10 @@ class Download:
         while True:
             _pc = Download.s3_count_partitions(s3_client,bucket,topic)
             if _pc is not None:
+                # create temp. topic directory
+                for p in range(_pc):
+                    common.createDir(os.path.join(tmp_dir,topic,str(p)))
+
                 for _pt in range(_pc):
                     _ck = Download.s3_read_checkpoint_partition(tmp_dir,topic,str(_pt))
                     _partition_path = os.path.join(topic,str(_pt))

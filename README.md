@@ -15,7 +15,8 @@ but if application got restarted then it may be vary for first back file.
 
 **Restore Application**
 * it will restore from backup dir into given topic.
-* `RETRY_SECONDS` controls when to reread `FILESYSTEM_BACKUP_DIR` for new files.
+* `RETRY_SECONDS` controls when to reread `FILESYSTEM_BACKUP_DIR` for new files and download from S3 as well.
+
 
 ## Requirements
 * confluent-kafka
@@ -85,7 +86,7 @@ $ python3 backup.py backup.json
 ....
 ```
 
-# Backup Directory Structure
+# Backup Application Directory Structure
 ```
 /tmp/davinder.test/
 ├── 0
@@ -125,6 +126,19 @@ python3 restore.py restore.json
 }
 ```
 
+**S3 Filesytem Restore.json**
+```
+{
+  "BOOTSTRAP_SERVERS": "kafka01:9092,kafka02:9092,kafka03:9092",
+  "BACKUP_TOPIC_NAME": "davinder.test",
+  "RESTORE_TOPIC_NAME": "davinder-restore.test",
+  "FILESYSTEM_TYPE": "S3",
+  "BUCKET_NAME": "davinder-test-kafka-backup",
+  "FILESYSTEM_BACKUP_DIR": "/tmp",
+  "RETRY_SECONDS": 100
+}
+```
+
 **Example Local Restore Run Output**
 ```
 $ python3 restore.py restore.json
@@ -133,4 +147,33 @@ $ python3 restore.py restore.json
 { "@timestamp": "2020-06-06 11:33:42,823","level": "INFO","thread": "Kafka Producer","name": "root","message": "waiting for more files in /tmp/davinder.test" }
 { "@timestamp": "2020-06-06 11:33:43,822","level": "INFO","thread": "Kafka Producer","name": "root","message": "restore successful of file /tmp/davinder.test/20200606-121934.tar.gz" }}
 ....
+```
+
+**Example S3 Restore Run Output**
+```
+$ python3 restore.py restore.json
+{ "@timestamp": "2020-06-16 13:12:25,007","level": "INFO","thread": "MainThread","name": "root","message": "successful loading of all variables" }
+{ "@timestamp": "2020-06-16 13:12:25,026","level": "INFO","thread": "S3 Download","name": "botocore.credentials","message": "Found credentials in environment variables." }
+{ "@timestamp": "2020-06-16 13:12:25,511","level": "INFO","thread": "S3 Download","name": "root","message": "retry for new file after 100s in s3://davinder-test-kafka-backup/davinder.test" }
+{ "@timestamp": "2020-06-16 13:14:43,306","level": "INFO","thread": "S3 Download","name": "root","message": "download success for /tmp/davinder.test/2/20200611-110611.tar.gz and its sha256 file " }
+....
+```
+
+# Restore Application Directory Structure [ Temporary ]
+```
+/tmp/davinder.test/
+├── 0
+│   ├── 20200611-101529.tar.gz
+│   ├── 20200611-101529.tar.gz.sha256
+│   └── checkpoint
+├── 1
+│   ├── 20200611-101532.tar.gz
+│   ├── 20200611-101532.tar.gz.sha256
+│   └── checkpoint
+└── 2
+    ├── 20200611-101531.tar.gz
+    ├── 20200611-101531.tar.gz.sha256
+    ├── 20200611-101534.tar.gz
+    ├── 20200611-101534.tar.gz.sha256
+    └── checkpoint
 ```

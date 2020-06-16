@@ -80,7 +80,7 @@ def main():
         exit(1)
 
     b = KRestore(config)
-    
+   
     if b.FILESYSTEM_TYPE == "S3":
         threading.Thread(
             target=Download.s3_download,
