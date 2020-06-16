@@ -25,10 +25,10 @@ class KRestore:
             self.RETRY_SECONDS = 60
         
         self.FILESYSTEM_TYPE = config['FILESYSTEM_TYPE']
+        self.FILESYSTEM_BACKUP_DIR = config['FILESYSTEM_BACKUP_DIR']
 
         if self.FILESYSTEM_TYPE == "S3":
             self.BUCKET_NAME = config['BUCKET_NAME']
-            self.FILESYSTEM_BACKUP_DIR = config['FILESYSTEM_BACKUP_DIR']
 
         logging.info(f"successful loading of all variables")
 
@@ -82,11 +82,15 @@ def main():
     b = KRestore(config)
     
     if b.FILESYSTEM_TYPE == "S3":
-        Download.s3_download(b.BUCKET_NAME, b.BACKUP_TOPIC_NAME,b.FILESYSTEM_BACKUP_DIR)
+        threading.Thread(
+            target=Download.s3_download,
+            args=[b.BUCKET_NAME, b.BACKUP_TOPIC_NAME,b.FILESYSTEM_BACKUP_DIR,b.RETRY_SECONDS],
+            name="S3 Download"
+        ).start()
 
-    _wtk = threading.Thread(
-        target=b.restore,
-        name="Kafka Producer"
-    ).start()
+    # _wtk = threading.Thread(
+    #     target=b.restore,
+    #     name="Kafka Producer"
+    # ).start()
 
 main()
