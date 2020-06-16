@@ -80,7 +80,9 @@ def main():
         exit(1)
 
     b = KRestore(config)
-    Download.s3_download(b.BUCKET_NAME, b.BACKUP_TOPIC_NAME,b.FILESYSTEM_BACKUP_DIR)
+    
+    if b.FILESYSTEM_TYPE == "S3":
+        Download.s3_download(b.BUCKET_NAME, b.BACKUP_TOPIC_NAME,b.FILESYSTEM_BACKUP_DIR)
 
     _wtk = threading.Thread(
         target=b.restore,

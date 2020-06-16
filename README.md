@@ -1,4 +1,6 @@
 # Apache Kafka Backup and Restore
+**`If there are too many get/put requests to S3 then increase NUMBER_OF_MESSAGE_PER_BACKUP_FILE to reduce s3 requests`**
+
 **Backup Application**
 * It will take backup of given topic and store that into either local filesystem or S3.
 * It will auto resume from same point from where it died if given consumer group name is same before and after crash.

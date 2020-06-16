@@ -44,7 +44,10 @@ class Download:
         try:
             logging.info(os.path.join(dir,topic,partition,"checkpoint"))
             with open(os.path.join(dir,topic,partition,"checkpoint")) as c:
-                return c.readline().strip()
+                line = c.readline().strip()
+                _ck_file = line.split()[0]
+                _total_files = line.split()[1]
+                return {"checkpoint": _ck_file, "total_files": _total_files}
         except FileNotFoundError as e:
             logging.debug(e)
         return None
@@ -66,15 +69,34 @@ class Download:
         except:
             return None
 
+    def s3_list_files(s3_client,bucket,path):
+        _list = []
+        paginator = s3_client.get_paginator('list_objects_v2')
+        operation_parameters = {'Bucket': bucket,'Prefix': path}
+        page_iterator = paginator.paginate(**operation_parameters)
+        filtered_iterator = page_iterator.search("Contents[?!contains(Key, '.tar.gz.sha256')][]")
+        for key_data in filtered_iterator:
+            _list.append(key_data['Key'])
+        
+        logging.debug(sorted(_list))
+        return sorted(_list)
+
     def s3_download(bucket,topic,tmp_dir):
         s3_client = boto3.client('s3')
         _pc = Download.s3_count_partitions(s3_client,bucket,topic)
         if _pc is not None:
             for _pt in range(_pc):
                 _ck = Download.s3_read_checkpoint_partition(tmp_dir,topic,str(_pt))
+                _partition_path = os.path.join(topic,str(_pt))
+                _s3_partition_files = Download.s3_list_files(s3_client,bucket,_partition_path)
                 if _ck is not None:
-                    logging.info(f"starting download from s3 from checkpoint {_ck} partition {_pt}")
+                    try:
+                        _s3_partition_files.index(os.path.join(_partition_path,_ck['checkpoint']))
+                    except ValueError:
+                        logging.error(f"checkout not found in s3 files")
+
+                    logging.info(f"checkpoint {_ck['checkpoint']}, total downloaded files {_ck['total_files']} partition {_pt}")
                 else:
-                    logging.info(f"reading all files from s3 for partition {_pt}")
+                    logging.info(f"reading all files from s3 for partition {_s3_partition_files}")
         else:
             logging.error("No Partitions found")
