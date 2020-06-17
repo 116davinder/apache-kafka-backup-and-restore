@@ -66,13 +66,13 @@ class KRestore:
                                 for line in _f.readlines():
                                     line.strip()
                                     _rt.poll(0)
-                                    if self.RESTORE_PARTITION == "random":
+                                    if self.RESTORE_PARTITION_STRATEGY == "random":
                                         _rt.produce(
                                             self.RESTORE_TOPIC_NAME,
                                             line.encode('utf-8'),
                                             callback=KRestore.delivery_report
                                         )
-                                    elif self.RESTORE_PARTITION == "same":
+                                    elif self.RESTORE_PARTITION_STRATEGY == "same":
                                         _rt.produce(
                                             self.RESTORE_TOPIC_NAME,
                                             line.encode('utf-8'),
