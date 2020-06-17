@@ -1,6 +1,6 @@
 import logging
 import boto3
-from botocore.exceptions import ClientError
+from botocore.exceptions import ClientError,NoCredentialsError
 import os
 import time
 import threading
@@ -67,8 +67,9 @@ class Download:
                 Prefix=topic + "/",
                 Delimiter='/'
             )['KeyCount']
-        except:
-            return None
+        except NoCredentialsError as e:
+            logging.error(e)
+            exit(1)
 
     def s3_list_files(s3_client,bucket,path):
         _list = []
@@ -96,42 +97,42 @@ class Download:
         s3_client = boto3.client('s3')
         while True:
             _pc = Download.s3_count_partitions(s3_client,bucket,topic)
-            if _pc is not None:
-                # create temp. topic directory
-                for p in range(_pc):
-                    common.createDir(os.path.join(tmp_dir,topic,str(p)))
+            # create temp. topic directory
+            for p in range(_pc):
+                common.createDir(os.path.join(tmp_dir,topic,str(p)))
 
-                for _pt in range(_pc):
-                    _ck = Download.s3_read_checkpoint_partition(tmp_dir,topic,str(_pt))
-                    _partition_path = os.path.join(topic,str(_pt))
-                    _s3_partition_files = Download.s3_list_files(s3_client,bucket,_partition_path)
-                    if _ck is not None:
-                        logging.debug(f"checkpoint {_ck['checkpoint']}, total downloaded files {_ck['total_files']} partition {_pt}")
-                        try:
-                            _index = _s3_partition_files.index(_ck['checkpoint']) + 1
-                        except ValueError:
-                            _index = 0
-                            logging.error(f"checkpoint not found in s3 files")
-                    else:
-                        _ck = {}
-                        _ck['checkpoint'] = ""
-                        _ck['total_files'] = 0
-                        _index = 0
-                    
-                    logging.debug(f"Total Files: {len(_s3_partition_files)}, partition: {_pt}, files to download: {len(_s3_partition_files[_index:])}")
-
+            for _pt in range(_pc):
+                _ck = Download.s3_read_checkpoint_partition(tmp_dir,topic,str(_pt))
+                _partition_path = os.path.join(topic,str(_pt))
+                _s3_partition_files = Download.s3_list_files(s3_client,bucket,_partition_path)
+                if _ck is not None:
+                    logging.debug(f"checkpoint {_ck['checkpoint']}, total downloaded files {_ck['total_files']} partition {_pt}")
                     try:
-                        _ck['total_files'] = int(_ck['total_files'])
-                    except ValueError as e:
-                        logging.error(e)
+                        _index = _s3_partition_files.index(_ck['checkpoint']) + 1
+                    except ValueError:
+                        _index = 0
+                        logging.error(f"checkpoint not found in s3 files")
+                else:
+                    _ck = {}
+                    _ck['checkpoint'] = ""
+                    _ck['total_files'] = 0
+                    _index = 0
+                
+                logging.debug(f"Total Files: {len(_s3_partition_files)}, partition: {_pt}, files to download: {len(_s3_partition_files[_index:])}")
 
-                    if _ck['total_files'] < len(_s3_partition_files):
-                        for file in _s3_partition_files[_index + 1:]:
-                            Download.s3_download_file(s3_client,bucket,file,os.path.join(tmp_dir,file))
-                            _ck['total_files'] += 1
-                            Download.s3_write_checkpoint_partition(tmp_dir,topic,str(_pt),file + " " + str(_ck['total_files']))
-                    
-                    logging.info(f"retry for new file after {retry_download_seconds}s in s3://{bucket}/{topic}")
-                    time.sleep(retry_download_seconds)
-            else:
-                logging.error(f"No Partitions found in given S3 path s3://{bucket}/{topic}")
+                try:
+                    _ck['total_files'] = int(_ck['total_files'])
+                except ValueError as e:
+                    logging.error(e)
+
+                if _ck['total_files'] < len(_s3_partition_files):
+                    for file in _s3_partition_files[_index + 1:]:
+                        Download.s3_download_file(s3_client,bucket,file,os.path.join(tmp_dir,file))
+                        _ck['total_files'] += 1
+                        Download.s3_write_checkpoint_partition(tmp_dir,topic,str(_pt),file + " " + str(_ck['total_files']))
+                
+                logging.info(f"retry for new file after {retry_download_seconds}s in s3://{bucket}/{topic}")
+                time.sleep(retry_download_seconds)
+            if _pc == 0:
+                logging.error(f"No Partitions found in given S3 path s3://{bucket}/{topic} retry seconds {retry_download_seconds}s")
+                time.sleep(retry_download_seconds)

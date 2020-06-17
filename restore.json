@@ -5,5 +5,7 @@
   "FILESYSTEM_TYPE": "S3",
   "BUCKET_NAME": "davinder-test-kafka-backup",
   "FILESYSTEM_BACKUP_DIR": "/tmp",
-  "RETRY_SECONDS": 100
+  "RETRY_SECONDS": 100,
+  "RESTORE_PARTITION_STRATEGY": "same/random",
+  "LOG_LEVEL": 20
 }

@@ -1,7 +1,15 @@
 # Apache Kafka Backup and Restore
-**`If there are too many get/put requests to S3 then increase NUMBER_OF_MESSAGE_PER_BACKUP_FILE to reduce s3 requests`**
 
-**Backup Application**
+**General Notes**
+* `LOG_LEVEL` values can be found https://docs.python.org/3/library/logging.html#logging-levels
+* `If there are too many get/put requests to S3 then increase NUMBER_OF_MESSAGE_PER_BACKUP_FILE to reduce s3 requests.`
+
+## Requirements
+* confluent-kafka
+* boto3
+
+# Kafka Backup Application
+
 * It will take backup of given topic and store that into either local filesystem or S3.
 * It will auto resume from same point from where it died if given consumer group name is same before and after crash.
 * it will upload `current.bin` file to s3 which contains messages upto `NUMBER_OF_MESSAGE_PER_BACKUP_FILE`
@@ -9,20 +17,10 @@ but will only upload with other backup files.
 * `RETRY_UPLOAD_SECONDS` controls upload to s3 or other cloud storage.
 * `NUMBER_OF_KAFKA_THREADS` is used to parallelise reading from kafka topic.
 It should not be more than number of partitions.
-* `LOG_LEVEL` values can be found https://docs.python.org/3/library/logging.html#logging-levels
 * `NUMBER_OF_MESSAGE_PER_BACKUP_FILE` will try to keep this number consistent in file
 but if application got restarted then it may be vary for first back file.
 
-**Restore Application**
-* it will restore from backup dir into given topic.
-* `RETRY_SECONDS` controls when to reread `FILESYSTEM_BACKUP_DIR` for new files and download from S3 as well.
-
-
-## Requirements
-* confluent-kafka
-* boto3
-
-# How to Run Kafka Backup Application
+**How to run it**
 ```
 export AWS_SECRET_ACCESS_KEY=XXXXXXXXXXXXXXX
 export AWS_ACCESS_KEY_ID=XXXXXXXXXXXXX
@@ -86,7 +84,7 @@ $ python3 backup.py backup.json
 ....
 ```
 
-# Backup Application Directory Structure
+**Backup Application Directory Structure**
 ```
 /tmp/davinder.test/
 ├── 0
@@ -105,9 +103,16 @@ $ python3 backup.py backup.json
 3 directories, 9 files
 ```
 
-# How to Run Kafka Restore Application
-`It is in progress, it may not work`
+# Kafka Restore Application
 
+* it will restore from backup dir into given topic.
+* `RETRY_SECONDS` controls when to reread `FILESYSTEM_BACKUP_DIR` for new files and download from S3 as well.
+* `RESTORE_PARTITION_STRATEGY` controls, in which partition it will restore messages. if **`same`** is mentioned then it will restore into same topic partition but if **`random`** is mentioned then it will restore to all partitions randomly.
+
+**Known Issues**
+* Restore application can't read from already extracted file which means if previous run failed while restoring content from xxx.bin file then it won't resume from same file.
+
+**How to run it**
 ```
 export AWS_SECRET_ACCESS_KEY=XXXXXXXXXXXXXXX
 export AWS_ACCESS_KEY_ID=XXXXXXXXXXXXX
@@ -122,7 +127,8 @@ python3 restore.py restore.json
   "RESTORE_TOPIC_NAME": "davinder-restore.test",
   "FILESYSTEM_TYPE": "LINUX",
   "FILESYSTEM_BACKUP_DIR": "/tmp/davinder.test",
-  "RETRY_SECONDS": 100
+  "RETRY_SECONDS": 100,
+  "RESTORE_PARTITION_STRATEGY": "same/random"
 }
 ```
 
@@ -135,7 +141,8 @@ python3 restore.py restore.json
   "FILESYSTEM_TYPE": "S3",
   "BUCKET_NAME": "davinder-test-kafka-backup",
   "FILESYSTEM_BACKUP_DIR": "/tmp",
-  "RETRY_SECONDS": 100
+  "RETRY_SECONDS": 100,
+  "RESTORE_PARTITION_STRATEGY": "same/random" 
 }
 ```
 
@@ -152,14 +159,14 @@ $ python3 restore.py restore.json
 **Example S3 Restore Run Output**
 ```
 $ python3 restore.py restore.json
-{ "@timestamp": "2020-06-16 13:12:25,007","level": "INFO","thread": "MainThread","name": "root","message": "successful loading of all variables" }
-{ "@timestamp": "2020-06-16 13:12:25,026","level": "INFO","thread": "S3 Download","name": "botocore.credentials","message": "Found credentials in environment variables." }
-{ "@timestamp": "2020-06-16 13:12:25,511","level": "INFO","thread": "S3 Download","name": "root","message": "retry for new file after 100s in s3://davinder-test-kafka-backup/davinder.test" }
-{ "@timestamp": "2020-06-16 13:14:43,306","level": "INFO","thread": "S3 Download","name": "root","message": "download success for /tmp/davinder.test/2/20200611-110611.tar.gz and its sha256 file " }
+{ "@timestamp": "2020-06-17 13:13:45,986","level": "INFO","thread": "S3 Download","name": "botocore.credentials","message": "Found credentials in environment variables." }
+{ "@timestamp": "2020-06-17 13:13:46,416","level": "INFO","thread": "S3 Download","name": "root","message": "retry for new file after 100s in s3://davinder-test-kafka-backup/davinder.test" }
+{ "@timestamp": "2020-06-17 13:13:58,849","level": "INFO","thread": "Kafka Producer","name": "root","message": "restore successful of file /tmp/davinder.test/1/20200611-104925.tar.gz" }
+{ "@timestamp": "2020-06-17 13:15:26,651","level": "INFO","thread": "S3 Download","name": "root","message": "retry for new file after 100s in s3://davinder-test-kafka-backup/davinder.test" }
 ....
 ```
 
-# Restore Application Directory Structure [ Temporary ]
+**Restore Application Directory Structure [ Temporary ]**
 ```
 /tmp/davinder.test/
 ├── 0
