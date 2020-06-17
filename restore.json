@@ -1,7 +1,11 @@
 {
-  "BOOTSTRAP_SERVERS": "localhost:9092",
+  "BOOTSTRAP_SERVERS": "kafka01:9092,kafka02:9092,kafka03:9092",
+  "BACKUP_TOPIC_NAME": "davinder.test",
   "RESTORE_TOPIC_NAME": "davinder-restore.test",
-  "FILESYSTEM_TYPE": "LINUX",
-  "FILESYSTEM_BACKUP_DIR": "/tmp/davinder.test",
-  "RETRY_SECONDS": 100
+  "FILESYSTEM_TYPE": "S3",
+  "BUCKET_NAME": "davinder-test-kafka-backup",
+  "FILESYSTEM_BACKUP_DIR": "/tmp",
+  "RETRY_SECONDS": 100,
+  "RESTORE_PARTITION_STRATEGY": "same/random",
+  "LOG_LEVEL": 20
 }
