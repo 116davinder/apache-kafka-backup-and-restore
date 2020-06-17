@@ -1,5 +1,8 @@
 # Apache Kafka Backup and Restore
 
+**Production Kafka Deployment Using Ansible**
+* https://github.com/116davinder/kafka-cluster-ansible/wiki
+
 **General Notes**
 * `LOG_LEVEL` values can be found https://docs.python.org/3/library/logging.html#logging-levels
 * `If there are too many get/put requests to S3 then increase NUMBER_OF_MESSAGE_PER_BACKUP_FILE to reduce s3 requests.`
