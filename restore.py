@@ -109,9 +109,8 @@ class KRestore:
                         )
                         logging.info(f"restore successful of file {_file}")
 
-                if len(_partition_backup_files) < 2:
-                    logging.info(f"retry for more files in {_base_topic_dir} after {self.RETRY_SECOND}")
-                    time.sleep(self.RETRY_SECONDS)
+            logging.info(f"retry for more files in {_base_topic_dir} after {self.RETRY_SECOND}")
+            time.sleep(self.RETRY_SECONDS)
 
 def main():
 
