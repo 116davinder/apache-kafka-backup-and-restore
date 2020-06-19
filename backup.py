@@ -41,7 +41,7 @@ class KBackup:
         _bt.subscribe(self.TOPIC_NAME_LIST)
 
         for p in common.findNumberOfPartitionsInTopic(_bt.list_topics().topics[self.TOPIC_NAME_LIST[0]].partitions):
-            common.createDir(os.path.join(self.BACKUP_DIR, str(p)))
+            os.makedirs(os.path.join(self.BACKUP_DIR, str(p)),exist_ok=True)
 
         count = 0
         logging.info(f"started polling on {self.TOPIC_NAME_LIST[0]}")

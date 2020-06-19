@@ -52,15 +52,6 @@ def createSha256OfBackupFile(file,hash):
     except:
         logging.error(f'unable to write to {file}.sha256')
 
-def createDir(dir):
-    try:
-        os.mkdir(dir)
-    except FileExistsError as e:
-        logging.debug(e)
-    except:
-        logging.error(f'unable to create folder {dir}')
-        exit(1)
-
 # def currentMessageCountInBinFile(file):
 #     try:
 #         with open(file) as f:

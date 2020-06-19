@@ -27,7 +27,10 @@ class Upload:
             if len(_list) > _count_partition_dirs and threading.active_count() <= thread_count:
                 for file_name in _list:
                     file_name = str(file_name)
-                    if os.path.getsize(file_name) > 0:
+                    file_size = os.path.getsize(file_name)
+                    if ( file_size > 0 and file_name.endswith(".tar.gz")
+                        or
+                        file_size > 0 and file_name.endswith(".tar.gz.sha256")):
                         object_name = file_name.split(dir)[1]
                         t = threading.Thread(
                             target=Upload.s3_upload_file,
@@ -76,7 +79,8 @@ class Download:
         paginator = s3_client.get_paginator('list_objects_v2')
         operation_parameters = {'Bucket': bucket,'Prefix': path}
         page_iterator = paginator.paginate(**operation_parameters)
-        filtered_iterator = page_iterator.search("Contents[?!contains(Key, '.tar.gz.sha256') && !contains(Key, '.bin') ][]")
+        search_condition = "Contents[?!contains(Key, '.tar.gz.sha256') && !contains(Key, '.bin') && !contains(Key, '.checkpoint')][]"
+        filtered_iterator = page_iterator.search(search_condition)
         for key_data in filtered_iterator:
             _list.append(key_data['Key'])
         
@@ -91,7 +95,7 @@ class Download:
             s3_client.download_file(bucket, object_path + ".sha256", file_path + ".sha256")
             logging.info(f"download success for {file_path} and its sha256 file ")
         except ClientError as e:
-            logging.error(e)
+            logging.error(f"{file_path} failed with error {e}")
 
     def s3_download(bucket,topic,tmp_dir,retry_download_seconds=60):
         s3_client = boto3.client('s3')
@@ -99,7 +103,7 @@ class Download:
             _pc = Download.s3_count_partitions(s3_client,bucket,topic)
             # create temp. topic directory
             for p in range(_pc):
-                common.createDir(os.path.join(tmp_dir,topic,str(p)))
+                os.makedirs(os.path.join(tmp_dir,topic,str(p)),exist_ok=True)
 
             for _pt in range(_pc):
                 _ck = Download.s3_read_checkpoint_partition(tmp_dir,topic,str(_pt))
@@ -128,11 +132,12 @@ class Download:
                 if _ck['total_files'] < len(_s3_partition_files):
                     for file in _s3_partition_files[_index + 1:]:
                         Download.s3_download_file(s3_client,bucket,file,os.path.join(tmp_dir,file))
-                        _ck['total_files'] += 1
-                        Download.s3_write_checkpoint_partition(tmp_dir,topic,str(_pt),file + " " + str(_ck['total_files']))
-                
-                logging.info(f"retry for new file after {retry_download_seconds}s in s3://{bucket}/{topic}")
-                time.sleep(retry_download_seconds)
+                        if file.endswith(".tar.gz"):
+                            _ck['total_files'] += 1
+                            Download.s3_write_checkpoint_partition(tmp_dir,topic,str(_pt),file + " " + str(_ck['total_files']))
+
             if _pc == 0:
                 logging.error(f"No Partitions found in given S3 path s3://{bucket}/{topic} retry seconds {retry_download_seconds}s")
-                time.sleep(retry_download_seconds)
+
+            logging.info(f"retry for new file after {retry_download_seconds}s in s3://{bucket}/{topic}")
+            time.sleep(retry_download_seconds)

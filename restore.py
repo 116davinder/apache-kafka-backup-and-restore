@@ -48,6 +48,31 @@ class KRestore:
         else:
             logging.debug(f'Message delivered to {msg.topic()} [{msg.partition()}]')
 
+    def write_to_kafka(rt,binFile,partition,topic,rts):
+        if binFile is not None:
+            with open(binFile) as _f:
+                for line in _f.readlines():
+                    line.strip()
+                    rt.poll(0)
+                    if rts == "random":
+                        rt.produce(
+                            topic,
+                            line.encode('utf-8'),
+                            callback=KRestore.delivery_report
+                        )
+                    elif rts == "same":
+                        rt.produce(
+                            topic,
+                            line.encode('utf-8'),
+                            callback=KRestore.delivery_report,
+                            partition=int(partition)
+                        )
+                    rt.flush()
+            try:
+                os.remove(binFile)
+            except FileNotFoundError:
+                pass
+
     def restore(self):
         _rt = confluent_kafka.Producer(self.PRODUCERCONFIG)
         while True:
@@ -56,39 +81,37 @@ class KRestore:
             for _p in _partitions_in_backup_dir:
                 _partition_dir = os.path.join(_base_topic_dir,_p)
                 _partition_backup_files = common.findFilesInFolder(_partition_dir,pattern="*.tar.gz")
+
+                # restore already extracted files
+                _partition_backup_bin_files = common.findFilesInFolder(_partition_dir,pattern="*.bin")
+                for _r_bin_file in _partition_backup_bin_files:
+                    KRestore.write_to_kafka(
+                        _rt,
+                        _r_bin_file,
+                        _p,
+                        self.RESTORE_TOPIC_NAME,
+                        self.RESTORE_PARTITION_STRATEGY
+                    )
+                    logging.info(f"restore successful of file {_r_bin_file}.tar.gz")
+
+                # restore new .tar.gz files
                 for _file in _partition_backup_files:
                     _file = str(_file)
                     _sha_file = _file + ".sha256"
                     if os.path.getsize(_file) > 0 and os.path.exists(_sha_file):
                         _binFile = common.extractBinFile(_file,_sha_file,_partition_dir)
-                        if _binFile is not None:
-                            with open(_binFile) as _f:
-                                for line in _f.readlines():
-                                    line.strip()
-                                    _rt.poll(0)
-                                    if self.RESTORE_PARTITION_STRATEGY == "random":
-                                        _rt.produce(
-                                            self.RESTORE_TOPIC_NAME,
-                                            line.encode('utf-8'),
-                                            callback=KRestore.delivery_report
-                                        )
-                                    elif self.RESTORE_PARTITION_STRATEGY == "same":
-                                        _rt.produce(
-                                            self.RESTORE_TOPIC_NAME,
-                                            line.encode('utf-8'),
-                                            callback=KRestore.delivery_report,
-                                            partition=int(_p)
-                                        )
-                                    _rt.flush()
-                            try:
-                                os.remove(_binFile)
-                            except FileNotFoundError:
-                                pass
-                            logging.info(f"restore successful of file {_file}")
+                        KRestore.write_to_kafka(
+                            _rt,
+                            _binFile,
+                            _p,
+                            self.RESTORE_TOPIC_NAME,
+                            self.RESTORE_PARTITION_STRATEGY
+                        )
+                        logging.info(f"restore successful of file {_file}")
 
-            if len(_partition_backup_files) < 2:
-                logging.info(f"waiting for more files in {_base_topic_dir}")
-                time.sleep(self.RETRY_SECONDS)
+                if len(_partition_backup_files) < 2:
+                    logging.info(f"retry for more files in {_base_topic_dir} after {self.RETRY_SECOND}")
+                    time.sleep(self.RETRY_SECONDS)
 
 def main():
 
@@ -103,6 +126,8 @@ def main():
     b = KRestore(config)
     common.setLoggingFormat(b.LOG_LEVEL)
 
+    os.makedirs(os.path.join(b.BACKUP_DIR,b.BACKUP_TOPIC_NAME),exist_ok=True)
+
     if b.FILESYSTEM_TYPE == "S3":
         threading.Thread(
             target=Download.s3_download,
@@ -112,7 +137,7 @@ def main():
 
     _wtk = threading.Thread(
         target=b.restore,
-        name="Kafka Producer"
+        name="Kafka Thread"
     ).start()
 
 main()
