@@ -5,7 +5,7 @@ import threading
 from common import common
 from google.cloud import storage
 
-class gUpload:
+class Upload:
 
     def gcs_upload_file(gcs_client,bucket,file_name,object_name):
 
@@ -40,7 +40,7 @@ class gUpload:
                 logging.info(f"gcs upload retry for new files in {retry_upload_seconds} seconds")
                 time.sleep(retry_upload_seconds)
 
-class gDownload:
+class Download:
 
     def gcs_list_blobs_with_prefix(gcs_client,bucket,start_offset=None,end_offset=None,prefix=None):
         return gcs_client.list_blobs(

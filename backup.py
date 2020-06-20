@@ -2,7 +2,7 @@ import confluent_kafka
 import os
 import logging
 import threading
-from cloud.aws import Upload
+from cloud import aws
 from common import common
 
 class KBackup:
@@ -106,7 +106,7 @@ def main():
                 logging.debug(f"setting RETRY_UPLOAD_SECONDS to default 60 ")
                 retry_upload_seconds = 60
             
-            Upload.s3_upload(bucket,tmp_dir,topic_name,retry_upload_seconds,b.NUMBER_OF_KAFKA_THREADS + 1)
+            aws.Upload.s3_upload(bucket,tmp_dir,topic_name,retry_upload_seconds,b.NUMBER_OF_KAFKA_THREADS + 1)
 
         except KeyError as e:
             logging.error(f"unable to set s3 required variables {e}")

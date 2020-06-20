@@ -5,7 +5,7 @@ import threading
 import confluent_kafka
 import time
 from common import common
-from cloud.aws import Download
+from cloud import aws
 
 class KRestore:
 
@@ -129,7 +129,7 @@ def main():
 
     if b.FILESYSTEM_TYPE == "S3":
         threading.Thread(
-            target=Download.s3_download,
+            target=aws.Download.s3_download,
             args=[b.BUCKET_NAME, b.BACKUP_TOPIC_NAME,b.FILESYSTEM_BACKUP_DIR,b.RETRY_SECONDS],
             name="S3 Download"
         ).start()
