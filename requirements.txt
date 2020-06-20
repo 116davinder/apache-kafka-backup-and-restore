@@ -1,2 +1,3 @@
 confluent_kafka
 boto3
+google-cloud-storage
