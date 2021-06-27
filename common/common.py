@@ -1,5 +1,5 @@
 from hashlib import sha256
-from datetime import datetime
+import pendulum
 import os
 import tarfile
 import json
@@ -78,7 +78,7 @@ def writeDataToKafkaBinFile(file,msg,mode):
         logging.error(f'unable to write to {file}')
 
 def createTarGz(dir,file):
-    _date = datetime.now().strftime("%Y%m%d-%H%M%S")
+    _date = pendulum.now().strftime("%Y%m%d-%H%M%S")
     _file_tar_gz = os.path.join(dir, _date ) + ".tar.gz"
     try:
         _t = tarfile.open(_file_tar_gz, "w:gz")
