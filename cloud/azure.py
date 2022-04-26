@@ -30,7 +30,6 @@ class Upload:
         based on checkpoint file for each partition.
         It will call `upload_file` function to upload.
         It will run after every `retry_upload_seconds`"""
-
         blob_service_client = BlobServiceClient.from_connection_string(
             connect_str)
 
@@ -61,7 +60,6 @@ class Download:
 
     def get_partitions(container_client, container_name, topic):
         """It will return partitions in a given container and path."""
-
         try:
             return [i.name for i in container_client.walk_blobs(
                 name_starts_with=topic + "/",
@@ -73,7 +71,6 @@ class Download:
 
     def list_files(container_client, prefix):
         """It will list all files for given container and prefix"""
-
         _list = []
         __all_files = container_client.walk_blobs(
             name_starts_with=prefix,
@@ -101,7 +98,6 @@ class Download:
         file_path: str
             Description: path from local filesystem
         """
-
         try:
             # donwload .tar.gz
             blob_client = blob_service_client.get_blob_client(
@@ -125,9 +121,7 @@ class Download:
         based on checkpoint file for each partition.
         It will call `download_file` function to download backup
         and backup sha file.
-
         It will run after every `retry_download_seconds`"""
-
         blob_service_client = BlobServiceClient.from_connection_string(
             connect_str)
 

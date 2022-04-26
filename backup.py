@@ -7,7 +7,7 @@ from common import common
 
 class KBackup:
     def __init__(self, config):
-
+        """initialize variables"""
         self.BOOTSTRAP_SERVERS = config['BOOTSTRAP_SERVERS']
         self.GROUP_ID = config['GROUP_ID']
         self.TOPIC_NAME_LIST = config['TOPIC_NAMES']

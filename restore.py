@@ -9,6 +9,7 @@ from common import common
 class KRestore:
 
     def __init__(self, config):
+        """initialize variables"""
         self.BOOTSTRAP_SERVERS = config['BOOTSTRAP_SERVERS']
         self.BACKUP_TOPIC_NAME = config['BACKUP_TOPIC_NAME']
         self.RESTORE_TOPIC_NAME = config['RESTORE_TOPIC_NAME']
