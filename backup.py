@@ -123,7 +123,8 @@ def main():
 
         connect_str = os.getenv('AZURE_STORAGE_CONNECTION_STRING')
         if connect_str is None:
-            logging.error("Env Azuure Storage Connection string is missing")
+            logging.error("Env Azure Storage Connection string is missing")
+            exit(1)
 
         # import only if FS TYPE is Selected
         from cloud import azure

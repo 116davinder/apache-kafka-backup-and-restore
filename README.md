@@ -31,3 +31,10 @@ but if application got restarted then it may be vary for first back file.
 
 **Known Issues**
 * Restore application can't read from already extracted file which means if previous run failed while restoring content from xxx.bin file then it won't resume from same file.
+
+## How to Run Applications
+[Azure Cloud Readme](./README-Azure.md)
+
+[AWS Cloud Readme](./README-AWS.md)
+
+[Local Readme](./README-Local.md)
