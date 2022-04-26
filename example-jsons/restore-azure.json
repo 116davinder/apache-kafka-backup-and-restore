@@ -1,0 +1,11 @@
+{
+  "BOOTSTRAP_SERVERS": "localhost:9092",
+  "BACKUP_TOPIC_NAME": "davinder.test",
+  "RESTORE_TOPIC_NAME": "davinder-restore.test",
+  "FILESYSTEM_TYPE": "AZURE",
+  "CONTAINER_NAME": "kafka-backup",
+  "FILESYSTEM_BACKUP_DIR": "/tmp",
+  "RETRY_SECONDS": 100,
+  "RESTORE_PARTITION_STRATEGY": "random",
+  "LOG_LEVEL": 20
+}

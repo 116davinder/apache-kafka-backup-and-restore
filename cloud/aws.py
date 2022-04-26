@@ -6,6 +6,7 @@ import time
 import threading
 from common import common, checkpoint
 
+
 class Upload:
 
     def s3_upload_file(s3_client,bucket,file_name,object_name):
@@ -23,10 +24,10 @@ class Upload:
             logging.error(f"{file_path} upload failed error {e}")
 
     def s3_upload(bucket,dir,topic_name,retry_upload_seconds,thread_count):
-        """It will initialize s3 client and 
+        """It will initialize s3 client and
         based on checkpoint file for each partition.
         It will call `s3_upload_file` function to upload.
-        
+
         It will run after every `retry_upload_seconds`"""
 
         s3_client = boto3.client('s3')
@@ -50,6 +51,7 @@ class Upload:
             else:
                 logging.info(f"s3 upload retry for new files in {retry_upload_seconds} seconds")
                 time.sleep(retry_upload_seconds)
+
 
 class Download:
 
@@ -77,7 +79,7 @@ class Download:
         filtered_iterator = page_iterator.search(search_condition)
         for key_data in filtered_iterator:
             _list.append(key_data['Key'])
-        
+
         logging.debug(sorted(_list))
         return sorted(_list)
 
@@ -89,7 +91,7 @@ class Download:
         s3_client : boto3.client('s3')
 
         bucket: str
-        
+
         object_path: str
             Description: path in s3 bucket
 
@@ -107,11 +109,11 @@ class Download:
             logging.error(f"{file_path} failed with error {e}")
 
     def s3_download(bucket,topic,tmp_dir,retry_download_seconds=60):
-        """It will initialize s3 client and 
+        """It will initialize s3 client and
         based on checkpoint file for each partition.
         It will call `s3_download_file` function to download backup
         and backup sha file.
-        
+
         It will run after every `retry_download_seconds`"""
 
         s3_client = boto3.client('s3')
@@ -138,7 +140,7 @@ class Download:
                     _ck['checkpoint'] = ""
                     _ck['total_files'] = 0
                     _index = 0
-                
+
                 logging.debug(f"Total Files: {len(_s3_partition_files)}, partition: {_pt}, files to download: {len(_s3_partition_files[_index:])}")
 
                 try:

@@ -1,0 +1,12 @@
+{
+  "BOOTSTRAP_SERVERS": "localhost:9092",
+  "TOPIC_NAMES": ["davinder.test"],
+  "GROUP_ID": "Kafka-BackUp-Consumer-Group",
+  "CONTAINER_NAME": "kafka-backup",
+  "FILESYSTEM_TYPE": "AZURE",
+  "FILESYSTEM_BACKUP_DIR": "/tmp/",
+  "NUMBER_OF_MESSAGE_PER_BACKUP_FILE": 1000,
+  "RETRY_UPLOAD_SECONDS": 100,
+  "NUMBER_OF_KAFKA_THREADS": 2,
+  "LOG_LEVEL": 20
+}
