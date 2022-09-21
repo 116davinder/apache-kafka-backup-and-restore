@@ -35,6 +35,7 @@ python3 backup.py backup.json
   "TOPIC_NAMES": ["davinder.test"],
   "GROUP_ID": "Kafka-BackUp-Consumer-Group",
   "FILESYSTEM_TYPE": "S3",
+  "BUCKET_NAME": "davinder-test-kafka-backup",
   "FILESYSTEM_BACKUP_DIR": "/tmp/",
   "NUMBER_OF_MESSAGE_PER_BACKUP_FILE": 1000,
   "RETRY_UPLOAD_SECONDS": 100,
