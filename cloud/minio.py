@@ -136,6 +136,10 @@ class Download:
             secure=is_mino_secure
         )
 
+        if not minio_client.bucket_exists(bucket):
+            logging.error(f"{bucket} bucket doesn't exist")
+            exit(1)
+
         while True:
             _pc = Download.minio_count_partitions(minio_client, bucket, topic)
             # create temp. topic directory
