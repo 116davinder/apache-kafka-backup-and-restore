@@ -179,6 +179,7 @@ class Download:
 
             if _pc == 0:
                 logging.error(f"No Partitions found in given minio path minio://{bucket}/{topic} retry seconds {retry_download_seconds}s")
+                exit(1)
 
             logging.info(f"retry for new file after {retry_download_seconds}s in minio://{bucket}/{topic}")
             time.sleep(retry_download_seconds)

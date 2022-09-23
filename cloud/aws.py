@@ -157,6 +157,7 @@ class Download:
 
             if _pc == 0:
                 logging.error(f"No Partitions found in given S3 path s3://{bucket}/{topic} retry seconds {retry_download_seconds}s")
+                exit(1)
 
             logging.info(f"retry for new file after {retry_download_seconds}s in s3://{bucket}/{topic}")
             time.sleep(retry_download_seconds)
