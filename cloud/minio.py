@@ -15,13 +15,13 @@ class Upload:
         """
 
         try:
-            response = minio_client.fput_object(bucket,object_name,file_name)
+            minio_client.fput_object(bucket,object_name,file_name)
             logging.info(f"upload successful at minio://{bucket}/{object_name}")
             if not file_name.endswith(".bin"):
                 logging.debug(f"deleting uploaded file {file_name}")
                 os.remove(file_name)
         except MinioException as e:
-            logging.error(f"{file_path} upload failed error {e}")
+            logging.error(f"{file_name} upload failed error {e}")
 
     def minio_upload(
             minio_url,
@@ -58,7 +58,7 @@ class Upload:
                         or
                         file_size > 0 and file_name.endswith(".tar.gz.sha256")):
                         object_name = file_name.split(dir)[1]
-                        t = threading.Thread(
+                        threading.Thread(
                             target=Upload.minio_upload_file,
                             args=[minio_client,bucket,file_name,object_name],
                             name="MINIO Upload Threads"
@@ -157,7 +157,7 @@ class Download:
                         _index = _minio_partition_files.index(_ck['checkpoint']) + 1
                     except ValueError:
                         _index = 0
-                        logging.error(f"checkpoint not found in minio files")
+                        logging.error(f"[Not Found] checkpoint: {_ck['checkpoint']}, topic: {topic}, partition {_pt} in the given bucket: {bucket}")
                 else:
                     _ck = {}
                     _ck['checkpoint'] = ""
