@@ -26,7 +26,7 @@ class KRestore:
         self.FILESYSTEM_TYPE = config['FILESYSTEM_TYPE']
         self.FILESYSTEM_BACKUP_DIR = config['FILESYSTEM_BACKUP_DIR']
 
-        if self.FILESYSTEM_TYPE == "S3":
+        if self.FILESYSTEM_TYPE in ["S3", "MINIO"]:
             self.BUCKET_NAME = config['BUCKET_NAME']
 
         elif self.FILESYSTEM_TYPE == "AZURE":
@@ -48,7 +48,7 @@ class KRestore:
         if err is not None:
             logging.error(f'Message delivery failed: {err}')
         else:
-            logging.debug(f'Message delivered to {msg.topic()} [{msg.partition()}]')
+            logging.debug(f'Message delivered to topic: {msg.topic()} and partition: {msg.partition()}')
 
     def write_to_kafka(rt,binFile,partition,topic,rts):
         if binFile is not None:
@@ -94,7 +94,7 @@ class KRestore:
                         self.RESTORE_TOPIC_NAME,
                         self.RESTORE_PARTITION_STRATEGY
                     )
-                    logging.info(f"restore successful of file {_r_bin_file}.tar.gz")
+                    logging.info(f"restore successful of already extracted bin {_r_bin_file} file")
 
                 # restore new .tar.gz files
                 for _file in _partition_backup_files:

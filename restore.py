@@ -12,7 +12,7 @@ def main():
     try:
         config = common.readJsonConfig(os.sys.argv[1])
     except IndexError:
-        logging.error("restore.json is not passed")
+        logging.error("restore.json is not passed as argument")
         exit(1)
 
     b = KRestore(config)
@@ -46,6 +46,29 @@ def main():
             target=azure.Download.azure_download,
             args=[connect_str, b.CONTAINER_NAME, b.BACKUP_TOPIC_NAME, b.FILESYSTEM_BACKUP_DIR, b.RETRY_SECONDS],
             name="Azure Download"
+        ).start()
+
+    elif b.FILESYSTEM_TYPE == "MINIO":
+        minio_access_key = os.getenv('MINIO_ACCESS_KEY')
+        minio_secret_key = os.getenv('MINIO_SECRET_KEY')
+        if (minio_access_key or minio_secret_key) is None:
+            logging.error("Minio Access and Secret Key envs are missing")
+            exit(1)
+
+        try:
+            minio_url = config['MINIO_URL']
+            is_mino_secure = True if config['IS_MINIO_SECURE'] == "TRUE" else False
+        except KeyError as e:
+            logging.error(f"unable to find minio var: {e} in input json")
+            exit(1)
+
+        # import only if FS TYPE is Selected
+        from cloud import minio
+
+        threading.Thread(
+            target=minio.Download.minio_download,
+            args=[minio_url, is_mino_secure, minio_access_key, minio_secret_key, b.BUCKET_NAME, b.BACKUP_TOPIC_NAME, b.FILESYSTEM_BACKUP_DIR, b.RETRY_SECONDS],
+            name="Minio Download"
         ).start()
 
     threading.Thread(

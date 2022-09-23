@@ -1,0 +1,13 @@
+{
+  "BOOTSTRAP_SERVERS": "localhost:9092",
+  "BACKUP_TOPIC_NAME": "davinder.test",
+  "RESTORE_TOPIC_NAME": "davinder-restore.test",
+  "FILESYSTEM_TYPE": "MINIO",
+  "MINIO_URL": "localhost:9000",
+  "IS_MINIO_SECURE": "False",
+  "BUCKET_NAME": "kafka-backup",
+  "FILESYSTEM_BACKUP_DIR": "/tmp",
+  "RETRY_SECONDS": 100,
+  "RESTORE_PARTITION_STRATEGY": "same",
+  "LOG_LEVEL": 10
+}

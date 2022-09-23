@@ -97,9 +97,6 @@ A body is sent with the request" }
 * `RETRY_SECONDS` controls when to reread `FILESYSTEM_BACKUP_DIR` for new files and download from Azure Blob Storage as well.
 * `RESTORE_PARTITION_STRATEGY` controls, in which partition it will restore messages. if **`same`** is mentioned then it will restore into same topic partition but if **`random`** is mentioned then it will restore to all partitions randomly.
 
-**Known Issues**
-* Restore application can't read from already extracted file which means if previous run failed while restoring content from xxx.bin file then it won't resume from same file.
-
 **How to run it**
 ```
 export AZURE_STORAGE_CONNECTION_STRING="DefaultEndpointsProtocol=https;AccountName=davindertestingpython;AccountKey=xxxx==;EndpointSuffix=core.windows.net"
