@@ -21,7 +21,7 @@ class Upload:
                 logging.debug(f"deleting uploaded file {file_name}")
                 os.remove(file_name)
         except ClientError as e:
-            logging.error(f"{file_path} upload failed error {e}")
+            logging.error(f"{file_name} upload failed error {e}")
 
     def s3_upload(bucket,dir,topic_name,retry_upload_seconds,thread_count):
         """It will initialize s3 client and
@@ -43,7 +43,7 @@ class Upload:
                         or
                         file_size > 0 and file_name.endswith(".tar.gz.sha256")):
                         object_name = file_name.split(dir)[1]
-                        t = threading.Thread(
+                        threading.Thread(
                             target=Upload.s3_upload_file,
                             args=[s3_client,bucket,file_name,object_name],
                             name="S3 Upload Threads"
@@ -125,7 +125,7 @@ class Download:
 
             for _pt in range(_pc):
 
-                _ck = checkpoint.read_checkpoint_partition(tmp_dir,topic,str(_pt)
+                _ck = checkpoint.read_checkpoint_partition(tmp_dir,topic,str(_pt))
                 _partition_path = os.path.join(topic,str(_pt))
                 _s3_partition_files = Download.s3_list_files(s3_client,bucket,_partition_path)
                 if _ck is not None:
@@ -157,6 +157,7 @@ class Download:
 
             if _pc == 0:
                 logging.error(f"No Partitions found in given S3 path s3://{bucket}/{topic} retry seconds {retry_download_seconds}s")
+                exit(1)
 
             logging.info(f"retry for new file after {retry_download_seconds}s in s3://{bucket}/{topic}")
             time.sleep(retry_download_seconds)

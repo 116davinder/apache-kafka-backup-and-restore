@@ -12,8 +12,8 @@ def read_checkpoint_partition(dir,topic,partition):
             _total_files = line.split()[1]
             return {"checkpoint": _ck_file, "total_files": _total_files}
     except FileNotFoundError as e:
-        logging.error(e)
-    return None
+        logging.warn(e)
+        return None
 
 def write_checkpoint_partition(dir,topic,partition,msg):
     """It will write checkpoint message for given topic and partition to given checkpoint file"""

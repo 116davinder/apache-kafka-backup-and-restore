@@ -77,9 +77,6 @@ python3 backup.py example-jsons/backup-local.json
 * `RETRY_SECONDS` controls when to reread `FILESYSTEM_BACKUP_DIR` for new files.
 * `RESTORE_PARTITION_STRATEGY` controls, in which partition it will restore messages. if **`same`** is mentioned then it will restore into same topic partition but if **`random`** is mentioned then it will restore to all partitions randomly.
 
-**Known Issues**
-* Restore application can't read from already extracted file which means if previous run failed while restoring content from xxx.bin file then it won't resume from same file.
-
 **How to run it**
 ```
 python3 restore.py example-jsons/restore-local.json

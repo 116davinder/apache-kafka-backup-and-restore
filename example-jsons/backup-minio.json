@@ -1,8 +1,10 @@
 {
-  "BOOTSTRAP_SERVERS": "kafka01:9092,kafka02:9092,kafka03:9092",
+  "BOOTSTRAP_SERVERS": "localhost:9092",
   "TOPIC_NAMES": ["davinder.test"],
   "GROUP_ID": "Kafka-BackUp-Consumer-Group",
-  "FILESYSTEM_TYPE": "S3",
+  "FILESYSTEM_TYPE": "MINIO",
+  "MINIO_URL": "localhost:9000",
+  "IS_MINIO_SECURE": "False",
   "BUCKET_NAME": "kafka-backup",
   "FILESYSTEM_BACKUP_DIR": "/tmp/",
   "NUMBER_OF_MESSAGE_PER_BACKUP_FILE": 1000,
