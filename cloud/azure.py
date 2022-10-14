@@ -9,21 +9,27 @@ from common import common, checkpoint
 
 class Upload:
 
-    def upload_file(blob_service_client, container_name, file_name, object_name):
+    def upload_file(blob_service_client, container_name, file_name, file_object_name, sha_file_name, sha_file_object_name):
         try:
-            blob_client = blob_service_client.get_blob_client(
-                container_name, blob=object_name)
-
+            # upload tar file
+            blob_client_file = blob_service_client.get_blob_client(
+                container_name, blob=file_object_name)
             with open(file_name, "rb") as data:
-                blob_client.upload_blob(data)
-
+                blob_client_file.upload_blob(data)
             logging.info(f"upload successful {file_name}")
+            # upload sha file
+            blob_client_sha = blob_service_client.get_blob_client(
+                container_name, blob=sha_file_object_name)
+            with open(sha_file_name, "rb") as data:
+                blob_client_sha.upload_blob(data)
+            logging.info(f"upload successful {sha_file_name}")
+            # remove both uploaded files
+            os.remove(file_name)
+            os.remove(sha_file_name)
 
-            if not file_name.endswith(".bin"):
-                logging.debug(f"deleting uploaded file {file_name}")
-                os.remove(file_name)
         except Exception as e:
             logging.error(f"{file_name} upload failed error {e}")
+
 
     def upload(connect_str, container_name, dir, topic_name, retry_upload_seconds, thread_count):
         """Main function to initialize azure blob client and
@@ -35,26 +41,26 @@ class Upload:
 
         while True:
             _topic_dir = os.path.join(dir, topic_name)
-            _count_partition_dirs = len(common.listDirs(_topic_dir))
-            _list = common.findFilesInFolder(_topic_dir)
-            if len(_list) > _count_partition_dirs and threading.active_count() <= thread_count:
+            _list = common.findFilesInFolder(_topic_dir, pattern="*.tar.gz")
+            logging.debug(f"pending files to upload {len(_list)} and number of active threads {threading.active_count()}")
+            if threading.active_count() <= thread_count:
                 for file_name in _list:
-                    logging.info(file_name)
                     file_name = str(file_name)
-                    file_size = os.path.getsize(file_name)
-                    if file_size > 0 and file_name.endswith((".tar.gz", ".tar.gz.sha256")):
-                        object_name = file_name.split(dir)[1]
+                    file_object_name = file_name.split(dir)[1]
+                    sha_file_name = file_name + ".sha256"
+                    sha_file_object_name = file_object_name + ".sha256"
+                    if common.isFileAndShaFileExist(file_name, sha_file_name):
+                        logging.debug(f"start upload of file {file_name}")
                         threading.Thread(
                             target=Upload.upload_file,
                             args=[blob_service_client, container_name,
-                                  file_name, object_name],
+                                file_name, file_object_name,
+                                sha_file_name, sha_file_object_name],
                             name=f"Azure Upload Thread for {file_name}"
                         ).start()
-            else:
-                logging.info(
-                    f"Azure upload retry for new files in {retry_upload_seconds} seconds")
-                time.sleep(retry_upload_seconds)
 
+            logging.info(f"Azure upload retry for new files in {retry_upload_seconds} seconds")
+            time.sleep(retry_upload_seconds)
 
 class Download:
 

@@ -47,7 +47,7 @@ def calculateSha256(file):
         with open(file, "rb") as f:
             return sha256(f.read()).hexdigest()
     except FileNotFoundError as e:
-        logging.error(e)
+        logging.error(f"unable to calculate sha256 for {file} with error {e}")
     return None
 
 
@@ -140,3 +140,19 @@ def findNumberOfPartitionsInTopic(list):
     for i in list:
         _lp.append(i)
     return _lp
+
+
+def isFileAndShaFileExist(file, sha_file):
+    logging.debug(f"file name {file} and sha file {sha_file} to check")
+    try:
+        if (
+            os.path.exists(file),
+            os.path.exists(sha_file),
+            os.path.getsize(file) > 0,
+            os.path.getsize(sha_file) > 0
+        ):
+            return True
+    except Exception as e:
+        logging.debug(e)
+
+    return False

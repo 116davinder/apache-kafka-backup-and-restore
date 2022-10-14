@@ -34,7 +34,7 @@ but if application got restarted then it may be vary for first back file.
 
 **How to run it for MINIO**
 ```bash
-export MINIO_ACCESS_KEY="ZBPIIAOCJRY9QLUVEHQO"
+export MINIO_ACCESS_KEY="kwloXD6w54I18dJO"
 export MINIO_SECRET_KEY="vMIoCaBu9sSg4ODrSkbD9CGXtq0TTpq6kq7psLuE"
 
 python3 backup.py example-jsons/backup-minio.json
