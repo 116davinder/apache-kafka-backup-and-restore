@@ -1,0 +1,64 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ include "kafka-connect-restore.fullname" . }}
+  labels:
+    {{- include "kafka-connect-restore.labels" . | nindent 4 }}
+spec:
+  serviceName: {{ include "kafka-connect-restore.fullname" . }}
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "kafka-connect-restore.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      annotations:
+        checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
+      labels:
+        {{- include "kafka-connect-restore.selectorLabels" . | nindent 8 }}
+    spec:
+      containers:
+        - name: {{ include "kafka-connect-restore.fullname" . }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          command: ["python3", "restore.py", "config.json"]
+          ports:
+            - name: restore
+              containerPort: {{ .Values.service.port }}
+              protocol: TCP
+          volumeMounts:
+            - name: {{ include "kafka-connect-restore.fullname" . }}-restore-dir
+              mountPath: {{ .Values.persistentVolume.mountPath }}
+            - name: restore-config
+              mountPath: {{ .Values.scriptPath }}/config.json
+              subPath: config.json
+          resources: {{- toYaml .Values.resources | nindent 12 }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext: {}
+      terminationGracePeriodSeconds: 30
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      volumes: 
+        - name: restore-config
+          configMap:
+            name: {{ include "kafka-connect-restore.fullname" . }}
+  volumeClaimTemplates:
+  - metadata:
+      name: {{ include "kafka-connect-restore.fullname" . }}-restore-dir
+    spec:
+      accessModes: [ "{{ .Values.persistentVolume.accessModes }}" ]
+      resources:
+        requests:
+          storage: {{ .Values.persistentVolume.size }}

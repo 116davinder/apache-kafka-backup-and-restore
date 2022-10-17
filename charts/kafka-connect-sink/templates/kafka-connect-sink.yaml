@@ -1,0 +1,64 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ include "kafka-connect-sink.fullname" . }}
+  labels:
+    {{- include "kafka-connect-sink.labels" . | nindent 4 }}
+spec:
+  serviceName: {{ include "kafka-connect-sink.fullname" . }}
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "kafka-connect-sink.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      annotations:
+        checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
+      labels:
+        {{- include "kafka-connect-sink.selectorLabels" . | nindent 8 }}
+    spec:
+      containers:
+        - name: {{ include "kafka-connect-sink.fullname" . }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          command: ["python3", "backup.py", "config.json"]
+          ports:
+            - name: sink
+              containerPort: {{ .Values.service.port }}
+              protocol: TCP
+          volumeMounts:
+            - name: {{ include "kafka-connect-sink.fullname" . }}-backup-dir
+              mountPath: {{ .Values.persistentVolume.mountPath }}
+            - name: sink-config
+              mountPath: {{ .Values.scriptPath }}/config.json
+              subPath: config.json
+          resources: {{- toYaml .Values.resources | nindent 12 }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext: {}
+      terminationGracePeriodSeconds: 30
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      volumes: 
+        - name: sink-config
+          configMap:
+            name: {{ include "kafka-connect-sink.fullname" . }}
+  volumeClaimTemplates:
+  - metadata:
+      name: {{ include "kafka-connect-sink.fullname" . }}-backup-dir
+    spec:
+      accessModes: [ "{{ .Values.persistentVolume.accessModes }}" ]
+      resources:
+        requests:
+          storage: {{ .Values.persistentVolume.size }}

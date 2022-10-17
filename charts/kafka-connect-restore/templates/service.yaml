@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "kafka-connect-restore.fullname" . }}
+  labels:
+    {{- include "kafka-connect-restore.labels" . | nindent 4 }}
+spec:
+  type: {{ .Values.service.type }}
+  clusterIP: None
+  ports:
+    - port: {{ .Values.service.port }}
+      name: restore
+  selector:
+    {{- include "kafka-connect-restore.selectorLabels" . | nindent 4 }}
