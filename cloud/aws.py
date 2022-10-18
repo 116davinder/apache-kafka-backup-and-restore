@@ -31,6 +31,7 @@ class Upload:
 
         It will run after every `retry_upload_seconds`"""
 
+        # s3_client = boto3.client('s3', endpoint_url="http://localhost:4566", use_ssl=False) can be used for localstack testing
         s3_client = boto3.client('s3')
         while True:
             _topic_dir = os.path.join(dir, topic_name)
@@ -79,7 +80,8 @@ class Download:
         search_condition = "Contents[?!contains(Key, '.tar.gz.sha256') && !contains(Key, '.bin') && !contains(Key, '.checkpoint')][]"
         filtered_iterator = page_iterator.search(search_condition)
         for key_data in filtered_iterator:
-            _list.append(key_data['Key'])
+            if key_data:
+                _list.append(key_data['Key'])
 
         logging.debug(sorted(_list))
         return sorted(_list)
