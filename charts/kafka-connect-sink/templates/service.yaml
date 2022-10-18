@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "kafka-connect-sink.fullname" . }}
+  labels:
+    {{- include "kafka-connect-sink.labels" . | nindent 4 }}
+spec:
+  type: {{ .Values.service.type }}
+  clusterIP: None
+  ports:
+    - port: {{ .Values.service.port }}
+      name: sink
+  selector:
+    {{- include "kafka-connect-sink.selectorLabels" . | nindent 4 }}

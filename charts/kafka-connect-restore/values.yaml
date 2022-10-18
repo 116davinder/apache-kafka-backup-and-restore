@@ -1,0 +1,39 @@
+replicaCount: 1
+
+image:
+  repository: lazarovg/kafka-connect
+  tag: restore-3.9
+  pullPolicy: Always 
+
+nameOverride: ""
+fullnameOverride: ""
+
+# Put the same path as in the Dockerfile for WORKDIR
+scriptPath: /app
+
+# Kafka Connect Restore config 
+restoreConfig: |
+  {
+    "BOOTSTRAP_SERVERS": "kafka01:9092,kafka02:9092,kafka03:9092",
+    "BACKUP_TOPIC_NAME": "topic-name",
+    "RESTORE_TOPIC_NAME": "topic-restore-name",
+    "FILESYSTEM_TYPE": "S3",
+    "BUCKET_NAME": "bucket-name",
+    "FILESYSTEM_BACKUP_DIR": "/tmp",
+    "RETRY_SECONDS": 100,
+    "RESTORE_PARTITION_STRATEGY": "same/random"
+  }
+
+service:
+  type: ClusterIP
+  port: 9092
+
+resources: {}
+tolerations: []
+
+affinity: {}
+
+persistentVolume:
+  mountPath: /tmp/
+  accessModes: ReadWriteOnce
+  size: 6Gi

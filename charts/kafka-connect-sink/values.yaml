@@ -1,0 +1,41 @@
+replicaCount: 1
+
+image:
+  repository: lazarovg/kafka-connect
+  tag: sink-3.9
+  pullPolicy: Always
+
+nameOverride: ""
+fullnameOverride: ""
+
+# Put the same path as in the Dockerfile for WORKDIR
+scriptPath: /app
+
+# Kafka Connect Sink config 
+sinkConfig: |
+  {
+    "BOOTSTRAP_SERVERS": "kafka01:9092,kafka02:9092,kafka03:9092",
+    "TOPIC_NAMES": ["topic-name"],
+    "GROUP_ID": "Kafka-BackUp-Consumer-Group",
+    "FILESYSTEM_TYPE": "S3",
+    "BUCKET_NAME": "bucket-name,
+    "FILESYSTEM_BACKUP_DIR": "/tmp/",
+    "NUMBER_OF_MESSAGE_PER_BACKUP_FILE": 10000,
+    "RETRY_UPLOAD_SECONDS": 100,
+    "NUMBER_OF_KAFKA_THREADS": 2,
+    "LOG_LEVEL": 20
+  }
+
+service:
+  type: ClusterIP
+  port: 9092
+
+resources: {}
+tolerations: []
+
+affinity: {}
+
+persistentVolume:
+  mountPath: /tmp/
+  accessModes: ReadWriteOnce
+  size: 6Gi

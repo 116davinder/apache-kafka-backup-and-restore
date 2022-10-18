@@ -1,0 +1,13 @@
+FROM python:3.9
+
+ENV PYTHONDONTWRITEBYTECODE 1
+ENV PYTHONUNBUFFERED 1
+
+WORKDIR /app
+
+COPY cloud /app/cloud
+COPY common /app/common
+COPY library /app/library
+COPY backup.py requirements.txt /app/
+
+RUN python3 -m pip install -r requirements.txt
